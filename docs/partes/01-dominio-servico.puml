@@ -91,6 +91,7 @@ class Validacoes {
   +{static} textoOpcional(valor, campo, tamanhoMaximo) : String
   +{static} emailOpcional(valor, campo) : String
   +{static} obrigatorio(valor, mensagem) : T
+  +{static} decimalPositivo(valor, campo, maximo) : BigDecimal
 }
 GradeHorario --> "*" Horario
 Servico --> "*" PerfilAtendido

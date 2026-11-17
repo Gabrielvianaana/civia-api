@@ -1,0 +1,57 @@
+@startuml
+title CIVIA - Reciclagem: Controllers e BOs
+' Gerado a partir do codigo-fonte Java (pasta civia-*/src/main/java).
+!pragma layout smetana
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam dpi 150
+hide empty members
+top to bottom direction
+class CartaoController <<RestController>> {
+}
+class CartaoBO <<Service>> {
+}
+class ColetaController <<RestController>> {
+}
+class ColetaBO <<Service>> {
+}
+class EntregaController <<RestController>> {
+}
+class EntregaBO <<Service>> {
+}
+class MaterialController <<RestController>> {
+}
+class MaterialBO <<Service>> {
+}
+class PostoReciclagemController <<RestController>> {
+}
+class PostoReciclagemBO <<Service>> {
+}
+class RecompensaController <<RestController>> {
+}
+class RecompensaBO <<Service>> {
+}
+class TrocaController <<RestController>> {
+}
+class TrocaBO <<Service>> {
+}
+CartaoController ..> CartaoBO
+ColetaController ..> ColetaBO
+EntregaController ..> EntregaBO
+MaterialController ..> MaterialBO
+PostoReciclagemController ..> PostoReciclagemBO
+RecompensaController ..> RecompensaBO
+TrocaController ..> TrocaBO
+CartaoController -[hidden]down- ColetaController
+CartaoBO -[hidden]down- ColetaBO
+ColetaController -[hidden]down- EntregaController
+ColetaBO -[hidden]down- EntregaBO
+EntregaController -[hidden]down- MaterialController
+EntregaBO -[hidden]down- MaterialBO
+MaterialController -[hidden]down- PostoReciclagemController
+MaterialBO -[hidden]down- PostoReciclagemBO
+PostoReciclagemController -[hidden]down- RecompensaController
+PostoReciclagemBO -[hidden]down- RecompensaBO
+RecompensaController -[hidden]down- TrocaController
+RecompensaBO -[hidden]down- TrocaBO
+@enduml

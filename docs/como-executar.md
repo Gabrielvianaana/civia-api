@@ -67,8 +67,8 @@ Conecte no Oracle da FIAP com o seu usuario (SQL Developer, por exemplo) e execu
 
 Para recriar tudo do zero, rode antes `db/00_drop.sql`.
 
-> Mesmo sem o passo 3, a aplicacao cadastra sozinha os tipos de servico e os perfis atendidos ao subir
-> (`DataInitializer`), se essas tabelas estiverem vazias.
+> Mesmo sem o passo 3, a aplicacao cadastra sozinha os tipos de servico, os perfis atendidos e os materiais
+> da reciclagem ao subir (`DataInitializer`), se essas tabelas estiverem vazias.
 
 ### 3. Informar as credenciais do banco
 
@@ -93,7 +93,7 @@ O arquivo `.env` esta no `.gitignore`. Tambem e possivel exportar as variaveis n
 mvn verify
 ```
 
-Executa os testes unitarios das regras de negocio (RN03 a RN06) e das invariantes do dominio, e valida as
+Executa os testes unitarios das regras de negocio (RN03 a RN12) e das invariantes do dominio, e valida as
 dependencias entre as camadas.
 
 ### 5. Subir a aplicacao

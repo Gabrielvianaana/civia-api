@@ -16,6 +16,23 @@ package "br.com.fiap.civia.domain.dao" {
     +excluir(id: Long) : void
     +excluirPorServico(servicoId: Long) : void
   }
+  interface CartaoDAO {
+    +salvar(cartao: Cartao) : Cartao
+    +buscarPorId(id: Long) : Optional<Cartao>
+    +buscarPorCodigo(codigo: String) : Optional<Cartao>
+    +listar(status: StatusCartao) : List<Cartao>
+    +existePorCodigo(codigo: String) : boolean
+    +existeSubstituto(cartaoAnteriorId: Long) : boolean
+    +excluir(id: Long) : void
+  }
+  interface ColetaDAO {
+    +salvar(coleta: Coleta) : Coleta
+    +buscarPorId(id: Long) : Optional<Coleta>
+    +listar(postoId: Long) : List<Coleta>
+    +ultimaColetaDoPosto(postoId: Long) : Optional<LocalDateTime>
+    +existePorPosto(postoId: Long) : boolean
+    +excluir(id: Long) : void
+  }
   interface ConsultaTotemDAO {
     +salvar(consulta: ConsultaTotem) : ConsultaTotem
     +buscarPorId(id: Long) : Optional<ConsultaTotem>
@@ -28,6 +45,17 @@ package "br.com.fiap.civia.domain.dao" {
     +existePorPerfil(perfilId: Integer) : boolean
     +excluir(id: Long) : void
   }
+  interface EntregaDAO {
+    +salvar(entrega: Entrega) : Entrega
+    +buscarPorId(id: Long) : Optional<Entrega>
+    +listar(cartaoId: Long, postoId: Long) : List<Entrega>
+    +somarPesoDoCartao(cartaoId: Long, inicio: LocalDateTime, fim: LocalDateTime, idIgnorado: Long) : BigDecimal
+    +somarPesoDoPosto(postoId: Long, desde: LocalDateTime, idIgnorado: Long) : BigDecimal
+    +existePorCartao(cartaoId: Long) : boolean
+    +existePorPosto(postoId: Long) : boolean
+    +existePorMaterial(materialId: Integer) : boolean
+    +excluir(id: Long) : void
+  }
   interface HorarioDAO {
     +salvar(horario: Horario) : Horario
     +buscarPorId(id: Long) : Optional<Horario>
@@ -36,6 +64,14 @@ package "br.com.fiap.civia.domain.dao" {
     +existe(servicoId: Long, diaSemana: int, abertura: LocalTime, idIgnorado: Long) : boolean
     +excluir(id: Long) : void
     +excluirPorServico(servicoId: Long) : void
+  }
+  interface MaterialDAO {
+    +salvar(material: Material) : Material
+    +buscarPorId(id: Integer) : Optional<Material>
+    +listar() : List<Material>
+    +existePorNome(nome: String, idIgnorado: Integer) : boolean
+    +contar() : long
+    +excluir(id: Integer) : void
   }
   interface OrganizacaoDAO {
     +salvar(organizacao: Organizacao) : Organizacao
@@ -53,6 +89,20 @@ package "br.com.fiap.civia.domain.dao" {
     +existePorDescricao(descricao: String, idIgnorado: Integer) : boolean
     +contar() : long
     +excluir(id: Integer) : void
+  }
+  interface PostoReciclagemDAO {
+    +salvar(posto: PostoReciclagem) : PostoReciclagem
+    +buscarPorId(id: Long) : Optional<PostoReciclagem>
+    +listar(status: StatusPosto) : List<PostoReciclagem>
+    +existePorTotem(totemId: Long, idIgnorado: Long) : boolean
+    +excluir(id: Long) : void
+  }
+  interface RecompensaDAO {
+    +salvar(recompensa: Recompensa) : Recompensa
+    +buscarPorId(id: Long) : Optional<Recompensa>
+    +listar(ativo: Boolean) : List<Recompensa>
+    +existePorNome(nome: String, idIgnorado: Long) : boolean
+    +excluir(id: Long) : void
   }
   interface ServicoDAO {
     +salvar(servico: Servico) : Servico
@@ -77,6 +127,14 @@ package "br.com.fiap.civia.domain.dao" {
     +buscarPorId(id: Long) : Optional<Totem>
     +listar() : List<Totem>
     +existePorCodigo(codigo: String, idIgnorado: Long) : boolean
+    +excluir(id: Long) : void
+  }
+  interface TrocaDAO {
+    +salvar(troca: Troca) : Troca
+    +buscarPorId(id: Long) : Optional<Troca>
+    +listar(cartaoId: Long) : List<Troca>
+    +existePorCartao(cartaoId: Long) : boolean
+    +existePorRecompensa(recompensaId: Long) : boolean
     +excluir(id: Long) : void
   }
   interface UsuarioPainelDAO {
@@ -111,6 +169,33 @@ package "br.com.fiap.civia.domain.model" {
     +corrigir(servico: Servico, usuarioId: Long, status: StatusDisponibilidade, vagas: Integer, origem: OrigemAtualizacao, dataHora: LocalDateTime) : void
     +ehAnteriorA(instante: LocalDateTime) : boolean
   }
+  class Cartao {
+    +{static} TAMANHO_CODIGO : int
+    -id : Long
+    -codigo : String
+    -organizacaoEmissoraId : Long
+    -cartaoAnteriorId : Long
+    -dataEmissao : LocalDateTime
+    -status : StatusCartao
+    -saldoCreditos : int
+    +{static} emitir(codigo: String, organizacaoEmissoraId: Long, dataEmissao: LocalDateTime) : Cartao
+    +{static} substituir(anterior: Cartao, codigo: String, organizacaoEmissoraId: Long, dataEmissao: LocalDateTime) : Cartao
+    +{static} reconstituir(id: Long, codigo: String, organizacaoEmissoraId: Long, cartaoAnteriorId: Long, dataEmissao: LocalDateTime, status: StatusCartao, saldoCreditos: Integer) : Cartao
+    +atualizar(organizacaoEmissoraId: Long, novoStatus: StatusCartao) : void
+    +creditar(creditos: int) : void
+    +debitar(creditos: int) : void
+    +garantirAtivo() : void
+  }
+  class Coleta {
+    -id : Long
+    -postoId : Long
+    -cooperativaId : Long
+    -pesoTotalKg : BigDecimal
+    -dataColeta : LocalDateTime
+    +{static} registrar(postoId: Long, cooperativaId: Long, pesoTotalKg: BigDecimal, dataColeta: LocalDateTime) : Coleta
+    +{static} reconstituir(id: Long, postoId: Long, cooperativaId: Long, pesoTotalKg: BigDecimal, dataColeta: LocalDateTime) : Coleta
+    +atualizar(postoId: Long, cooperativaId: Long, pesoTotalKg: BigDecimal, dataColeta: LocalDateTime) : void
+  }
   class ConsultaTotem {
     +{static} TAMANHO_CODIGO : int
     -id : Long
@@ -128,6 +213,19 @@ package "br.com.fiap.civia.domain.model" {
     +atualizar(totemId: Long, tipoServicoId: Integer, perfilId: Integer, servicoEscolhidoId: Long, imprimiuRota: boolean, pediuAbordagem: boolean, codigoGerado: String) : void
     +registrarChegada(instante: LocalDateTime) : void
     +chegadaRegistrada() : boolean
+  }
+  class Entrega {
+    +{static} PESO_MAXIMO_KG : BigDecimal
+    -id : Long
+    -cartaoId : Long
+    -postoId : Long
+    -materialId : Integer
+    -pesoKg : BigDecimal
+    -creditosGerados : int
+    -dataEntrega : LocalDateTime
+    +{static} registrar(cartaoId: Long, postoId: Long, material: Material, pesoKg: BigDecimal, dataEntrega: LocalDateTime) : Entrega
+    +{static} reconstituir(id: Long, cartaoId: Long, postoId: Long, materialId: Integer, pesoKg: BigDecimal, creditosGerados: Integer, dataEntrega: LocalDateTime) : Entrega
+    +corrigir(cartaoId: Long, postoId: Long, material: Material, pesoKg: BigDecimal) : void
   }
   class GradeHorario <<record>> {
     -funciona24h : boolean
@@ -149,6 +247,17 @@ package "br.com.fiap.civia.domain.model" {
     +{static} diaSemanaDe(dia: DayOfWeek) : int
     +{static} nomeDoDia(diaSemana: int) : String
     +abrangeInstante(instante: LocalDateTime) : boolean
+  }
+  class Material {
+    -id : Integer
+    -nome : String
+    -creditosPorKg : int
+    -aceito : boolean
+    +{static} novo(nome: String, creditosPorKg: Integer, aceito: boolean) : Material
+    +{static} reconstituir(id: Integer, nome: String, creditosPorKg: Integer, aceito: boolean) : Material
+    +atualizar(nome: String, creditosPorKg: Integer, aceito: boolean) : void
+    +garantirAceito() : void
+    +calcularCreditos(pesoKg: BigDecimal) : int
   }
   class Organizacao {
     -id : Long
@@ -176,6 +285,33 @@ package "br.com.fiap.civia.domain.model" {
     +{static} reconstituir(id: Integer, descricao: String) : PerfilAtendido
     +atualizar(descricao: String) : void
     +temDescricao(outra: String) : boolean
+  }
+  class PostoReciclagem {
+    +{static} LIMITE_DIARIO_PADRAO_KG : BigDecimal
+    -id : Long
+    -totemId : Long
+    -cooperativaId : Long
+    -capacidadeKg : BigDecimal
+    -limiteDiarioKg : BigDecimal
+    -status : StatusPosto
+    +{static} novo(totemId: Long, cooperativaId: Long, capacidadeKg: BigDecimal, limiteDiarioKg: BigDecimal, status: StatusPosto) : PostoReciclagem
+    +{static} reconstituir(id: Long, totemId: Long, cooperativaId: Long, capacidadeKg: BigDecimal, limiteDiarioKg: BigDecimal, status: StatusPosto) : PostoReciclagem
+    +atualizar(totemId: Long, cooperativaId: Long, capacidadeKg: BigDecimal, limiteDiarioKg: BigDecimal, status: StatusPosto) : void
+    +garantirRecebeEntregas() : void
+    +garantirCabe(acumuladoKg: BigDecimal, pesoKg: BigDecimal) : void
+    +atualizarLotacao(acumuladoKg: BigDecimal) : void
+    +liberarAposColeta() : void
+  }
+  class Recompensa {
+    -id : Long
+    -organizacaoParceiraId : Long
+    -nome : String
+    -custoCreditos : int
+    -ativo : boolean
+    +{static} nova(organizacaoParceiraId: Long, nome: String, custoCreditos: Integer, ativo: boolean) : Recompensa
+    +{static} reconstituir(id: Long, organizacaoParceiraId: Long, nome: String, custoCreditos: Integer, ativo: boolean) : Recompensa
+    +atualizar(organizacaoParceiraId: Long, nome: String, custoCreditos: Integer, ativo: boolean) : void
+    +garantirDisponivel() : void
   }
   class Servico {
     +{static} CAPACIDADE_MAXIMA : int
@@ -209,6 +345,10 @@ package "br.com.fiap.civia.domain.model" {
     APROVADO
     REPROVADO
   }
+  enum StatusCartao {
+    ATIVO
+    BLOQUEADO
+  }
   enum StatusDisponibilidade {
     TEM_VAGA
     POUCAS_VAGAS
@@ -222,6 +362,11 @@ package "br.com.fiap.civia.domain.model" {
     +getGrupoOrdenacao() : int
     +exigeVagas() : boolean
     +{static} de(situacao: SituacaoServico) : StatusDisponibilidade
+  }
+  enum StatusPosto {
+    ATIVO
+    CHEIO
+    MANUTENCAO
   }
   enum StatusTotem {
     ONLINE
@@ -261,6 +406,17 @@ package "br.com.fiap.civia.domain.model" {
     +atualizar(codigo: String, endereco: Endereco, coordenada: Coordenada, status: StatusTotem, papelImpressora: boolean, dataInstalacao: LocalDate, ultimaSincronizacao: LocalDateTime) : void
     +garantirDisponivelParaConsulta() : void
   }
+  class Troca {
+    -id : Long
+    -cartaoId : Long
+    -recompensaId : Long
+    -usuarioId : Long
+    -creditosUsados : int
+    -dataTroca : LocalDateTime
+    +{static} registrar(cartaoId: Long, recompensa: Recompensa, usuarioId: Long, dataTroca: LocalDateTime) : Troca
+    +{static} reconstituir(id: Long, cartaoId: Long, recompensaId: Long, usuarioId: Long, creditosUsados: Integer, dataTroca: LocalDateTime) : Troca
+    +corrigir(cartaoId: Long, recompensa: Recompensa, usuarioId: Long) : void
+  }
   class UsuarioPainel {
     -id : Long
     -organizacaoId : Long
@@ -272,12 +428,14 @@ package "br.com.fiap.civia.domain.model" {
     +{static} reconstituir(id: Long, organizacaoId: Long, nome: String, email: String, perfilAcesso: PerfilAcesso, ativo: boolean) : UsuarioPainel
     +atualizar(organizacaoId: Long, nome: String, email: String, perfilAcesso: PerfilAcesso, ativo: boolean) : void
     +garantirPodeAtualizar(servico: Servico) : void
+    +garantirPodeRegistrarTroca() : void
   }
   class Validacoes {
     +{static} textoObrigatorio(valor: String, campo: String, tamanhoMaximo: int) : String
     +{static} textoOpcional(valor: String, campo: String, tamanhoMaximo: int) : String
     +{static} emailOpcional(valor: String, campo: String) : String
     +{static} obrigatorio(valor: T, mensagem: String) : T
+    +{static} decimalPositivo(valor: BigDecimal, campo: String, maximo: BigDecimal) : BigDecimal
   }
 }
 package "br.com.fiap.civia.domain.valueobject" {
@@ -296,10 +454,12 @@ package "br.com.fiap.civia.domain.valueobject" {
 }
 AtualizacaoDisponibilidade --> "1" OrigemAtualizacao
 AtualizacaoDisponibilidade --> "1" StatusDisponibilidade
+Cartao --> "1" StatusCartao
 DomainException <|-- DadoInvalidoException
 DomainException <|-- RegraNegocioVioladaException
 GradeHorario --> "*" Horario
 Organizacao --> "1" TipoOrganizacao
+PostoReciclagem --> "1" StatusPosto
 Servico --> "*" PerfilAtendido
 Servico --> "1" Coordenada
 Servico --> "1" Endereco

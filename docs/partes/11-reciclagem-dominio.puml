@@ -1,0 +1,116 @@
+@startuml
+title CIVIA - Dominio: reciclagem (postos, materiais, cartoes, entregas, trocas e coletas)
+' Gerado a partir do codigo-fonte Java (pasta civia-*/src/main/java).
+!pragma layout smetana
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam dpi 150
+hide empty members
+top to bottom direction
+class PostoReciclagem {
+  +{static} LIMITE_DIARIO_PADRAO_KG : BigDecimal
+  -id : Long
+  -totemId : Long
+  -cooperativaId : Long
+  -capacidadeKg : BigDecimal
+  -limiteDiarioKg : BigDecimal
+  -status : StatusPosto
+  +{static} novo(totemId, cooperativaId, capacidadeKg, ...) : PostoReciclagem
+  +{static} reconstituir(id, totemId, cooperativaId, ...) : PostoReciclagem
+  +atualizar(totemId, cooperativaId, capacidadeKg, ...) : void
+  +garantirRecebeEntregas() : void
+  +garantirCabe(acumuladoKg, pesoKg) : void
+  +atualizarLotacao(acumuladoKg) : void
+  +liberarAposColeta() : void
+}
+enum StatusPosto {
+  ATIVO
+  CHEIO
+  MANUTENCAO
+}
+class Material {
+  -id : Integer
+  -nome : String
+  -creditosPorKg : int
+  -aceito : boolean
+  +{static} novo(nome, creditosPorKg, aceito) : Material
+  +{static} reconstituir(id, nome, creditosPorKg, aceito) : Material
+  +atualizar(nome, creditosPorKg, aceito) : void
+  +garantirAceito() : void
+  +calcularCreditos(pesoKg) : int
+}
+class Cartao {
+  +{static} TAMANHO_CODIGO : int
+  -id : Long
+  -codigo : String
+  -organizacaoEmissoraId : Long
+  -cartaoAnteriorId : Long
+  -dataEmissao : LocalDateTime
+  -status : StatusCartao
+  -saldoCreditos : int
+  +{static} emitir(codigo, organizacaoEmissoraId, dataEmissao) : Cartao
+  +{static} substituir(anterior, codigo, organizacaoEmissoraId, dataEmissao) : Cartao
+  +{static} reconstituir(id, codigo, organizacaoEmissoraId, ...) : Cartao
+  +atualizar(organizacaoEmissoraId, novoStatus) : void
+  +creditar(creditos) : void
+  +debitar(creditos) : void
+  +garantirAtivo() : void
+}
+enum StatusCartao {
+  ATIVO
+  BLOQUEADO
+}
+class Entrega {
+  +{static} PESO_MAXIMO_KG : BigDecimal
+  -id : Long
+  -cartaoId : Long
+  -postoId : Long
+  -materialId : Integer
+  -pesoKg : BigDecimal
+  -creditosGerados : int
+  -dataEntrega : LocalDateTime
+  +{static} registrar(cartaoId, postoId, material, ...) : Entrega
+  +{static} reconstituir(id, cartaoId, postoId, ...) : Entrega
+  +corrigir(cartaoId, postoId, material, pesoKg) : void
+}
+class Recompensa {
+  -id : Long
+  -organizacaoParceiraId : Long
+  -nome : String
+  -custoCreditos : int
+  -ativo : boolean
+  +{static} nova(organizacaoParceiraId, nome, custoCreditos, ativo) : Recompensa
+  +{static} reconstituir(id, organizacaoParceiraId, nome, ...) : Recompensa
+  +atualizar(organizacaoParceiraId, nome, custoCreditos, ativo) : void
+  +garantirDisponivel() : void
+}
+class Troca {
+  -id : Long
+  -cartaoId : Long
+  -recompensaId : Long
+  -usuarioId : Long
+  -creditosUsados : int
+  -dataTroca : LocalDateTime
+  +{static} registrar(cartaoId, recompensa, usuarioId, dataTroca) : Troca
+  +{static} reconstituir(id, cartaoId, recompensaId, ...) : Troca
+  +corrigir(cartaoId, recompensa, usuarioId) : void
+}
+class Coleta {
+  -id : Long
+  -postoId : Long
+  -cooperativaId : Long
+  -pesoTotalKg : BigDecimal
+  -dataColeta : LocalDateTime
+  +{static} registrar(postoId, cooperativaId, pesoTotalKg, dataColeta) : Coleta
+  +{static} reconstituir(id, postoId, cooperativaId, ...) : Coleta
+  +atualizar(postoId, cooperativaId, pesoTotalKg, dataColeta) : void
+}
+Cartao --> "1" StatusCartao
+PostoReciclagem --> "1" StatusPosto
+PostoReciclagem -[hidden]down- Cartao
+StatusPosto -[hidden]down- StatusCartao
+Material -[hidden]down- Entrega
+Cartao -[hidden]down- Recompensa
+StatusCartao -[hidden]down- Troca
+Entrega -[hidden]down- Coleta
+@enduml

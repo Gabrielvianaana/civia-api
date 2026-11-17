@@ -340,7 +340,235 @@ Content-Type: application/json
 ### Registrar chegada pelo codigo impresso (US14) (espera 200)
 PUT {{baseUrl}}/api/v1/consultas/chegada/{{codigoChegada}}
 
-### ===== 10 - Tratamento de erros =====
+### ===== 10 - Reciclagem: materiais e postos (T_MATERIAL, T_POSTO_RECICLAGEM) =====
+
+### Listar materiais (RN09: so lata e PET sao aceitas) (espera 200)
+GET {{baseUrl}}/api/v1/materiais
+
+### Cadastrar material (espera 201)
+POST {{baseUrl}}/api/v1/materiais
+Content-Type: application/json
+
+{
+  "nome": "Aluminio Postman (simulado)",
+  "creditosPorKg": 4,
+  "aceito": true
+}
+
+> {% client.global.set("materialId", response.body.id); %}
+
+### Buscar material (espera 200)
+GET {{baseUrl}}/api/v1/materiais/{{materialId}}
+
+### Atualizar material (espera 200)
+PUT {{baseUrl}}/api/v1/materiais/{{materialId}}
+Content-Type: application/json
+
+{
+  "nome": "Aluminio Postman (simulado)",
+  "creditosPorKg": 6,
+  "aceito": true
+}
+
+### Listar postos (filtro opcional por status) (espera 200)
+GET {{baseUrl}}/api/v1/postos-reciclagem?status=ATIVO
+
+### Cadastrar posto no totem criado (limite diario 3 kg) (espera 201)
+POST {{baseUrl}}/api/v1/postos-reciclagem
+Content-Type: application/json
+
+{
+  "totemId": {{totemId}},
+  "cooperativaId": 4,
+  "capacidadeKg": 50,
+  "limiteDiarioKg": 3
+}
+
+> {% client.global.set("postoId", response.body.id); %}
+
+### Buscar posto (com material acumulado) (espera 200)
+GET {{baseUrl}}/api/v1/postos-reciclagem/{{postoId}}
+
+### Atualizar posto (espera 200)
+PUT {{baseUrl}}/api/v1/postos-reciclagem/{{postoId}}
+Content-Type: application/json
+
+{
+  "totemId": {{totemId}},
+  "cooperativaId": 4,
+  "capacidadeKg": 60,
+  "limiteDiarioKg": 3,
+  "status": "ATIVO"
+}
+
+### ===== 11 - Reciclagem: cartoes, entregas, recompensas e trocas =====
+
+### Emitir cartao anonimo no Centro POP (RN07) (espera 201)
+POST {{baseUrl}}/api/v1/cartoes
+Content-Type: application/json
+
+{
+  "organizacaoEmissoraId": 1
+}
+
+> {% client.global.set("cartaoId", response.body.id); client.global.set("codigoCartao", response.body.codigo); %}
+
+### Listar cartoes ativos (espera 200)
+GET {{baseUrl}}/api/v1/cartoes?status=ATIVO
+
+### Buscar cartao (espera 200)
+GET {{baseUrl}}/api/v1/cartoes/{{cartaoId}}
+
+### Consultar saldo pelo codigo do cartao (espera 200)
+GET {{baseUrl}}/api/v1/cartoes/codigo/{{codigoCartao}}
+
+### Atualizar cartao (espera 200)
+PUT {{baseUrl}}/api/v1/cartoes/{{cartaoId}}
+Content-Type: application/json
+
+{
+  "organizacaoEmissoraId": 1,
+  "status": "ATIVO"
+}
+
+### Registrar entrega de 2 kg de lata (gera 20 creditos) (espera 201)
+POST {{baseUrl}}/api/v1/entregas
+Content-Type: application/json
+
+{
+  "codigoCartao": "{{codigoCartao}}",
+  "postoId": "{{postoId}}",
+  "materialId": 1,
+  "pesoKg": 2
+}
+
+> {% client.global.set("entregaId", response.body.id); %}
+
+### Listar entregas do cartao (espera 200)
+GET {{baseUrl}}/api/v1/entregas?cartaoId={{cartaoId}}
+
+### Buscar entrega (espera 200)
+GET {{baseUrl}}/api/v1/entregas/{{entregaId}}
+
+### Corrigir peso da entrega (recalcula os creditos) (espera 200)
+PUT {{baseUrl}}/api/v1/entregas/{{entregaId}}
+Content-Type: application/json
+
+{
+  "codigoCartao": "{{codigoCartao}}",
+  "postoId": "{{postoId}}",
+  "materialId": 1,
+  "pesoKg": 2.5
+}
+
+### Listar recompensas ativas (espera 200)
+GET {{baseUrl}}/api/v1/recompensas?ativo=true
+
+### Cadastrar recompensa (espera 201)
+POST {{baseUrl}}/api/v1/recompensas
+Content-Type: application/json
+
+{
+  "organizacaoParceiraId": 5,
+  "nome": "Kit Postman (simulado)",
+  "custoCreditos": 15
+}
+
+> {% client.global.set("recompensaId", response.body.id); %}
+
+### Buscar recompensa (espera 200)
+GET {{baseUrl}}/api/v1/recompensas/{{recompensaId}}
+
+### Atualizar recompensa (espera 200)
+PUT {{baseUrl}}/api/v1/recompensas/{{recompensaId}}
+Content-Type: application/json
+
+{
+  "organizacaoParceiraId": 5,
+  "nome": "Kit Postman (simulado)",
+  "custoCreditos": 20,
+  "ativo": true
+}
+
+### Registrar troca (debita o custo do saldo - RN11) (espera 201)
+POST {{baseUrl}}/api/v1/trocas
+Content-Type: application/json
+
+{
+  "codigoCartao": "{{codigoCartao}}",
+  "recompensaId": "{{recompensaId}}",
+  "usuarioId": 1
+}
+
+> {% client.global.set("trocaId", response.body.id); %}
+
+### Listar trocas do cartao (espera 200)
+GET {{baseUrl}}/api/v1/trocas?cartaoId={{cartaoId}}
+
+### Buscar troca (espera 200)
+GET {{baseUrl}}/api/v1/trocas/{{trocaId}}
+
+### Atualizar troca (registrada pelo gestor) (espera 200)
+PUT {{baseUrl}}/api/v1/trocas/{{trocaId}}
+Content-Type: application/json
+
+{
+  "codigoCartao": "{{codigoCartao}}",
+  "recompensaId": "{{recompensaId}}",
+  "usuarioId": 3
+}
+
+### Emitir cartao que sera perdido (espera 201)
+POST {{baseUrl}}/api/v1/cartoes
+Content-Type: application/json
+
+{
+  "organizacaoEmissoraId": 1
+}
+
+> {% client.global.set("cartaoPerdidoId", response.body.id); %}
+
+### Substituir cartao perdido (RN12: bloqueia e transfere o saldo) (espera 201)
+POST {{baseUrl}}/api/v1/cartoes
+Content-Type: application/json
+
+{
+  "organizacaoEmissoraId": 1,
+  "cartaoAnteriorId": "{{cartaoPerdidoId}}"
+}
+
+> {% client.global.set("cartaoNovoId", response.body.id); %}
+
+### ===== 12 - Reciclagem: coletas (T_COLETA) =====
+
+### Registrar coleta (sem peso: usa o material acumulado) (espera 201)
+POST {{baseUrl}}/api/v1/coletas
+Content-Type: application/json
+
+{
+  "postoId": "{{postoId}}",
+  "cooperativaId": 4
+}
+
+> {% client.global.set("coletaId", response.body.id); %}
+
+### Listar coletas do posto (espera 200)
+GET {{baseUrl}}/api/v1/coletas?postoId={{postoId}}
+
+### Buscar coleta (espera 200)
+GET {{baseUrl}}/api/v1/coletas/{{coletaId}}
+
+### Corrigir peso da coleta (espera 200)
+PUT {{baseUrl}}/api/v1/coletas/{{coletaId}}
+Content-Type: application/json
+
+{
+  "postoId": "{{postoId}}",
+  "cooperativaId": 4,
+  "pesoTotalKg": 2.6
+}
+
+### ===== 13 - Tratamento de erros =====
 
 ### 400 - campos invalidos (Bean Validation) (espera 400)
 POST {{baseUrl}}/api/v1/servicos
@@ -401,7 +629,86 @@ Content-Type: application/json
 ### 422 - totem em manutencao (espera 422)
 GET {{baseUrl}}/api/v1/totens/3/servicos
 
-### ===== 11 - Limpeza (DELETE) =====
+### 422 - RN09 vidro nao e aceito no posto (espera 422)
+POST {{baseUrl}}/api/v1/entregas
+Content-Type: application/json
+
+{
+  "codigoCartao": "{{codigoCartao}}",
+  "postoId": "{{postoId}}",
+  "materialId": 3,
+  "pesoKg": 1
+}
+
+### 422 - RN08 limite diario do cartao (espera 422)
+POST {{baseUrl}}/api/v1/entregas
+Content-Type: application/json
+
+{
+  "codigoCartao": "{{codigoCartao}}",
+  "postoId": "{{postoId}}",
+  "materialId": 1,
+  "pesoKg": 1
+}
+
+### 422 - RN11 saldo insuficiente para a troca (espera 422)
+POST {{baseUrl}}/api/v1/trocas
+Content-Type: application/json
+
+{
+  "codigoCartao": "{{codigoCartao}}",
+  "recompensaId": "{{recompensaId}}",
+  "usuarioId": 1
+}
+
+### 422 - RN07 cartao emitido fora do Centro POP (espera 422)
+POST {{baseUrl}}/api/v1/cartoes
+Content-Type: application/json
+
+{
+  "organizacaoEmissoraId": 2
+}
+
+### 409 - cartao ja substituido (espera 409)
+POST {{baseUrl}}/api/v1/cartoes
+Content-Type: application/json
+
+{
+  "organizacaoEmissoraId": 1,
+  "cartaoAnteriorId": "{{cartaoPerdidoId}}"
+}
+
+### 404 - codigo de cartao inexistente (espera 404)
+GET {{baseUrl}}/api/v1/cartoes/codigo/ZZZZZZZZ
+
+### ===== 14 - Limpeza (DELETE) =====
+
+### Excluir troca (devolve os creditos) (espera 204)
+DELETE {{baseUrl}}/api/v1/trocas/{{trocaId}}
+
+### Excluir entrega (estorna os creditos) (espera 204)
+DELETE {{baseUrl}}/api/v1/entregas/{{entregaId}}
+
+### Excluir coleta (espera 204)
+DELETE {{baseUrl}}/api/v1/coletas/{{coletaId}}
+
+### Excluir posto (espera 204)
+DELETE {{baseUrl}}/api/v1/postos-reciclagem/{{postoId}}
+
+### Excluir cartao substituto (espera 204)
+DELETE {{baseUrl}}/api/v1/cartoes/{{cartaoNovoId}}
+
+### Excluir cartao perdido (espera 204)
+DELETE {{baseUrl}}/api/v1/cartoes/{{cartaoPerdidoId}}
+
+### Excluir cartao (espera 204)
+DELETE {{baseUrl}}/api/v1/cartoes/{{cartaoId}}
+
+### Excluir recompensa (espera 204)
+DELETE {{baseUrl}}/api/v1/recompensas/{{recompensaId}}
+
+### Excluir material (espera 204)
+DELETE {{baseUrl}}/api/v1/materiais/{{materialId}}
 
 ### Excluir consulta (espera 204)
 DELETE {{baseUrl}}/api/v1/consultas/{{consultaId}}

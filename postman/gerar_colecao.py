@@ -104,7 +104,59 @@ req(P, "Atualizar consulta (pediu abordagem social)", "PUT", "/api/v1/consultas/
      "imprimiuRota": True, "pediuAbordagem": True})
 req(P, "Registrar chegada pelo codigo impresso (US14)", "PUT", "/api/v1/consultas/chegada/{{codigoChegada}}")
 
-P = "10 - Tratamento de erros"
+P = "10 - Reciclagem: materiais e postos (T_MATERIAL, T_POSTO_RECICLAGEM)"
+req(P, "Listar materiais (RN09: so lata e PET sao aceitas)", "GET", "/api/v1/materiais")
+req(P, "Cadastrar material", "POST", "/api/v1/materiais",
+    {"nome": "Aluminio Postman (simulado)", "creditosPorKg": 4, "aceito": True}, 201, {"materialId": "id"})
+req(P, "Buscar material", "GET", "/api/v1/materiais/{{materialId}}")
+req(P, "Atualizar material", "PUT", "/api/v1/materiais/{{materialId}}",
+    {"nome": "Aluminio Postman (simulado)", "creditosPorKg": 6, "aceito": True})
+req(P, "Listar postos (filtro opcional por status)", "GET", "/api/v1/postos-reciclagem?status=ATIVO")
+req(P, "Cadastrar posto no totem criado (limite diario 3 kg)", "POST", "/api/v1/postos-reciclagem",
+    {"totemId": "{{totemId}}", "cooperativaId": 4, "capacidadeKg": 50, "limiteDiarioKg": 3}, 201, {"postoId": "id"})
+req(P, "Buscar posto (com material acumulado)", "GET", "/api/v1/postos-reciclagem/{{postoId}}")
+req(P, "Atualizar posto", "PUT", "/api/v1/postos-reciclagem/{{postoId}}",
+    {"totemId": "{{totemId}}", "cooperativaId": 4, "capacidadeKg": 60, "limiteDiarioKg": 3, "status": "ATIVO"})
+
+P = "11 - Reciclagem: cartoes, entregas, recompensas e trocas"
+req(P, "Emitir cartao anonimo no Centro POP (RN07)", "POST", "/api/v1/cartoes",
+    {"organizacaoEmissoraId": 1}, 201, {"cartaoId": "id", "codigoCartao": "codigo"})
+req(P, "Listar cartoes ativos", "GET", "/api/v1/cartoes?status=ATIVO")
+req(P, "Buscar cartao", "GET", "/api/v1/cartoes/{{cartaoId}}")
+req(P, "Consultar saldo pelo codigo do cartao", "GET", "/api/v1/cartoes/codigo/{{codigoCartao}}")
+req(P, "Atualizar cartao", "PUT", "/api/v1/cartoes/{{cartaoId}}", {"organizacaoEmissoraId": 1, "status": "ATIVO"})
+req(P, "Registrar entrega de 2 kg de lata (gera 20 creditos)", "POST", "/api/v1/entregas",
+    {"codigoCartao": "{{codigoCartao}}", "postoId": "{{postoId}}", "materialId": 1, "pesoKg": 2}, 201, {"entregaId": "id"})
+req(P, "Listar entregas do cartao", "GET", "/api/v1/entregas?cartaoId={{cartaoId}}")
+req(P, "Buscar entrega", "GET", "/api/v1/entregas/{{entregaId}}")
+req(P, "Corrigir peso da entrega (recalcula os creditos)", "PUT", "/api/v1/entregas/{{entregaId}}",
+    {"codigoCartao": "{{codigoCartao}}", "postoId": "{{postoId}}", "materialId": 1, "pesoKg": 2.5})
+req(P, "Listar recompensas ativas", "GET", "/api/v1/recompensas?ativo=true")
+req(P, "Cadastrar recompensa", "POST", "/api/v1/recompensas",
+    {"organizacaoParceiraId": 5, "nome": "Kit Postman (simulado)", "custoCreditos": 15}, 201, {"recompensaId": "id"})
+req(P, "Buscar recompensa", "GET", "/api/v1/recompensas/{{recompensaId}}")
+req(P, "Atualizar recompensa", "PUT", "/api/v1/recompensas/{{recompensaId}}",
+    {"organizacaoParceiraId": 5, "nome": "Kit Postman (simulado)", "custoCreditos": 20, "ativo": True})
+req(P, "Registrar troca (debita o custo do saldo - RN11)", "POST", "/api/v1/trocas",
+    {"codigoCartao": "{{codigoCartao}}", "recompensaId": "{{recompensaId}}", "usuarioId": 1}, 201, {"trocaId": "id"})
+req(P, "Listar trocas do cartao", "GET", "/api/v1/trocas?cartaoId={{cartaoId}}")
+req(P, "Buscar troca", "GET", "/api/v1/trocas/{{trocaId}}")
+req(P, "Atualizar troca (registrada pelo gestor)", "PUT", "/api/v1/trocas/{{trocaId}}",
+    {"codigoCartao": "{{codigoCartao}}", "recompensaId": "{{recompensaId}}", "usuarioId": 3})
+req(P, "Emitir cartao que sera perdido", "POST", "/api/v1/cartoes", {"organizacaoEmissoraId": 1}, 201,
+    {"cartaoPerdidoId": "id"})
+req(P, "Substituir cartao perdido (RN12: bloqueia e transfere o saldo)", "POST", "/api/v1/cartoes",
+    {"organizacaoEmissoraId": 1, "cartaoAnteriorId": "{{cartaoPerdidoId}}"}, 201, {"cartaoNovoId": "id"})
+
+P = "12 - Reciclagem: coletas (T_COLETA)"
+req(P, "Registrar coleta (sem peso: usa o material acumulado)", "POST", "/api/v1/coletas",
+    {"postoId": "{{postoId}}", "cooperativaId": 4}, 201, {"coletaId": "id"})
+req(P, "Listar coletas do posto", "GET", "/api/v1/coletas?postoId={{postoId}}")
+req(P, "Buscar coleta", "GET", "/api/v1/coletas/{{coletaId}}")
+req(P, "Corrigir peso da coleta", "PUT", "/api/v1/coletas/{{coletaId}}",
+    {"postoId": "{{postoId}}", "cooperativaId": 4, "pesoTotalKg": 2.6})
+
+P = "13 - Tratamento de erros"
 req(P, "400 - campos invalidos (Bean Validation)", "POST", "/api/v1/servicos",
     {"nome": "", "latitude": 200}, 400)
 req(P, "400 - valor de enum invalido", "GET", "/api/v1/servicos?statusAprovacao=TALVEZ", None, 400)
@@ -118,8 +170,27 @@ req(P, "422 - vagas informadas para refeicao", "POST", "/api/v1/atualizacoes",
 req(P, "422 - equipe atualizando servico de outra organizacao", "POST", "/api/v1/atualizacoes",
     {"servicoId": 5, "usuarioId": "{{usuarioId}}", "situacao": "ABERTO"}, 422)
 req(P, "422 - totem em manutencao", "GET", "/api/v1/totens/3/servicos", None, 422)
+req(P, "422 - RN09 vidro nao e aceito no posto", "POST", "/api/v1/entregas",
+    {"codigoCartao": "{{codigoCartao}}", "postoId": "{{postoId}}", "materialId": 3, "pesoKg": 1}, 422)
+req(P, "422 - RN08 limite diario do cartao", "POST", "/api/v1/entregas",
+    {"codigoCartao": "{{codigoCartao}}", "postoId": "{{postoId}}", "materialId": 1, "pesoKg": 1}, 422)
+req(P, "422 - RN11 saldo insuficiente para a troca", "POST", "/api/v1/trocas",
+    {"codigoCartao": "{{codigoCartao}}", "recompensaId": "{{recompensaId}}", "usuarioId": 1}, 422)
+req(P, "422 - RN07 cartao emitido fora do Centro POP", "POST", "/api/v1/cartoes", {"organizacaoEmissoraId": 2}, 422)
+req(P, "409 - cartao ja substituido", "POST", "/api/v1/cartoes",
+    {"organizacaoEmissoraId": 1, "cartaoAnteriorId": "{{cartaoPerdidoId}}"}, 409)
+req(P, "404 - codigo de cartao inexistente", "GET", "/api/v1/cartoes/codigo/ZZZZZZZZ", None, 404)
 
-P = "11 - Limpeza (DELETE)"
+P = "14 - Limpeza (DELETE)"
+req(P, "Excluir troca (devolve os creditos)", "DELETE", "/api/v1/trocas/{{trocaId}}", None, 204)
+req(P, "Excluir entrega (estorna os creditos)", "DELETE", "/api/v1/entregas/{{entregaId}}", None, 204)
+req(P, "Excluir coleta", "DELETE", "/api/v1/coletas/{{coletaId}}", None, 204)
+req(P, "Excluir posto", "DELETE", "/api/v1/postos-reciclagem/{{postoId}}", None, 204)
+req(P, "Excluir cartao substituto", "DELETE", "/api/v1/cartoes/{{cartaoNovoId}}", None, 204)
+req(P, "Excluir cartao perdido", "DELETE", "/api/v1/cartoes/{{cartaoPerdidoId}}", None, 204)
+req(P, "Excluir cartao", "DELETE", "/api/v1/cartoes/{{cartaoId}}", None, 204)
+req(P, "Excluir recompensa", "DELETE", "/api/v1/recompensas/{{recompensaId}}", None, 204)
+req(P, "Excluir material", "DELETE", "/api/v1/materiais/{{materialId}}", None, 204)
 req(P, "Excluir consulta", "DELETE", "/api/v1/consultas/{{consultaId}}", None, 204)
 req(P, "Excluir totem", "DELETE", "/api/v1/totens/{{totemId}}", None, 204)
 req(P, "Excluir horario", "DELETE", "/api/v1/servicos/5/horarios/{{horarioId}}", None, 204)
@@ -167,7 +238,7 @@ colecao = {
     "info": {
         "name": "CIVIA API - Global Solution 2026",
         "description": "API RESTful da CIVIA (mapa de servicos para totens). Rode na ordem (Collection Runner): cada pasta "
-                       "cria registros, consulta, testa os erros e a pasta 11 apaga o que foi criado. Troque a variavel "
+                       "cria registros, consulta, testa os erros e a ultima pasta apaga o que foi criado. Troque a variavel "
                        "baseUrl para a URL do Render para testar o deploy.",
         "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     },

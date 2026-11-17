@@ -12,17 +12,29 @@ package "br.com.fiap.civia.application.bo" {
   }
   class CargaInicialBO <<Service>> {
   }
+  class CartaoBO <<Service>> {
+  }
+  class ColetaBO <<Service>> {
+  }
   class ConsultaTotemBO <<Service>> {
   }
   class DisponibilidadeBO <<Component>> {
+  }
+  class EntregaBO <<Service>> {
   }
   class HorarioBO <<Service>> {
   }
   class MapaServicosBO <<Service>> {
   }
+  class MaterialBO <<Service>> {
+  }
   class OrganizacaoBO <<Service>> {
   }
   class PerfilAtendidoBO <<Service>> {
+  }
+  class PostoReciclagemBO <<Service>> {
+  }
+  class RecompensaBO <<Service>> {
   }
   class ServicoBO <<Service>> {
   }
@@ -30,19 +42,33 @@ package "br.com.fiap.civia.application.bo" {
   }
   class TotemBO <<Service>> {
   }
+  class TrocaBO <<Service>> {
+  }
   class UsuarioPainelBO <<Service>> {
   }
 }
 package "br.com.fiap.civia.domain.dao" {
   interface AtualizacaoDisponibilidadeDAO {
   }
+  interface CartaoDAO {
+  }
+  interface ColetaDAO {
+  }
   interface ConsultaTotemDAO {
   }
+  interface EntregaDAO {
+  }
   interface HorarioDAO {
+  }
+  interface MaterialDAO {
   }
   interface OrganizacaoDAO {
   }
   interface PerfilAtendidoDAO {
+  }
+  interface PostoReciclagemDAO {
+  }
+  interface RecompensaDAO {
   }
   interface ServicoDAO {
   }
@@ -50,19 +76,33 @@ package "br.com.fiap.civia.domain.dao" {
   }
   interface TotemDAO {
   }
+  interface TrocaDAO {
+  }
   interface UsuarioPainelDAO {
   }
 }
 package "br.com.fiap.civia.infrastructure.dao" {
   class AtualizacaoDisponibilidadeDAOImpl <<Repository>> {
   }
+  class CartaoDAOImpl <<Repository>> {
+  }
+  class ColetaDAOImpl <<Repository>> {
+  }
   class ConsultaTotemDAOImpl <<Repository>> {
   }
+  class EntregaDAOImpl <<Repository>> {
+  }
   class HorarioDAOImpl <<Repository>> {
+  }
+  class MaterialDAOImpl <<Repository>> {
   }
   class OrganizacaoDAOImpl <<Repository>> {
   }
   class PerfilAtendidoDAOImpl <<Repository>> {
+  }
+  class PostoReciclagemDAOImpl <<Repository>> {
+  }
+  class RecompensaDAOImpl <<Repository>> {
   }
   class ServicoDAOImpl <<Repository>> {
   }
@@ -70,25 +110,41 @@ package "br.com.fiap.civia.infrastructure.dao" {
   }
   class TotemDAOImpl <<Repository>> {
   }
+  class TrocaDAOImpl <<Repository>> {
+  }
   class UsuarioPainelDAOImpl <<Repository>> {
   }
 }
 package "br.com.fiap.civia.infrastructure.jpa" {
   interface AtualizacaoDisponibilidadeJpaRepository {
   }
+  interface CartaoJpaRepository {
+  }
+  interface ColetaJpaRepository {
+  }
   interface ConsultaTotemJpaRepository {
   }
+  interface EntregaJpaRepository {
+  }
   interface HorarioJpaRepository {
+  }
+  interface MaterialJpaRepository {
   }
   interface OrganizacaoJpaRepository {
   }
   interface PerfilAtendidoJpaRepository {
+  }
+  interface PostoReciclagemJpaRepository {
+  }
+  interface RecompensaJpaRepository {
   }
   interface ServicoJpaRepository {
   }
   interface TipoServicoJpaRepository {
   }
   interface TotemJpaRepository {
+  }
+  interface TrocaJpaRepository {
   }
   interface UsuarioPainelJpaRepository {
   }
@@ -100,19 +156,33 @@ package "br.com.fiap.civia.presentation.config" {
 package "br.com.fiap.civia.presentation.controller" {
   class AtualizacaoDisponibilidadeController <<RestController>> {
   }
+  class CartaoController <<RestController>> {
+  }
+  class ColetaController <<RestController>> {
+  }
   class ConsultaTotemController <<RestController>> {
   }
+  class EntregaController <<RestController>> {
+  }
   class HorarioController <<RestController>> {
+  }
+  class MaterialController <<RestController>> {
   }
   class OrganizacaoController <<RestController>> {
   }
   class PerfilAtendidoController <<RestController>> {
+  }
+  class PostoReciclagemController <<RestController>> {
+  }
+  class RecompensaController <<RestController>> {
   }
   class ServicoController <<RestController>> {
   }
   class TipoServicoController <<RestController>> {
   }
   class TotemController <<RestController>> {
+  }
+  class TrocaController <<RestController>> {
   }
   class UsuarioPainelController <<RestController>> {
   }
@@ -123,8 +193,23 @@ AtualizacaoDisponibilidadeBO ..> UsuarioPainelDAO
 AtualizacaoDisponibilidadeController ..> AtualizacaoDisponibilidadeBO
 AtualizacaoDisponibilidadeDAO <|.. AtualizacaoDisponibilidadeDAOImpl
 AtualizacaoDisponibilidadeDAOImpl ..> AtualizacaoDisponibilidadeJpaRepository
+CargaInicialBO ..> MaterialDAO
 CargaInicialBO ..> PerfilAtendidoDAO
 CargaInicialBO ..> TipoServicoDAO
+CartaoBO ..> CartaoDAO
+CartaoBO ..> EntregaDAO
+CartaoBO ..> OrganizacaoDAO
+CartaoBO ..> TrocaDAO
+CartaoController ..> CartaoBO
+CartaoDAO <|.. CartaoDAOImpl
+CartaoDAOImpl ..> CartaoJpaRepository
+ColetaBO ..> ColetaDAO
+ColetaBO ..> EntregaDAO
+ColetaBO ..> OrganizacaoDAO
+ColetaBO ..> PostoReciclagemDAO
+ColetaController ..> ColetaBO
+ColetaDAO <|.. ColetaDAOImpl
+ColetaDAOImpl ..> ColetaJpaRepository
 ConsultaTotemBO ..> ConsultaTotemDAO
 ConsultaTotemBO ..> PerfilAtendidoDAO
 ConsultaTotemBO ..> ServicoDAO
@@ -134,6 +219,14 @@ ConsultaTotemController ..> ConsultaTotemBO
 ConsultaTotemDAO <|.. ConsultaTotemDAOImpl
 ConsultaTotemDAOImpl ..> ConsultaTotemJpaRepository
 DataInitializer ..> CargaInicialBO
+EntregaBO ..> CartaoDAO
+EntregaBO ..> ColetaDAO
+EntregaBO ..> EntregaDAO
+EntregaBO ..> MaterialDAO
+EntregaBO ..> PostoReciclagemDAO
+EntregaController ..> EntregaBO
+EntregaDAO <|.. EntregaDAOImpl
+EntregaDAOImpl ..> EntregaJpaRepository
 HorarioBO ..> HorarioDAO
 HorarioBO ..> ServicoDAO
 HorarioController ..> HorarioBO
@@ -146,6 +239,11 @@ MapaServicosBO ..> PerfilAtendidoDAO
 MapaServicosBO ..> ServicoDAO
 MapaServicosBO ..> TipoServicoDAO
 MapaServicosBO ..> TotemDAO
+MaterialBO ..> EntregaDAO
+MaterialBO ..> MaterialDAO
+MaterialController ..> MaterialBO
+MaterialDAO <|.. MaterialDAOImpl
+MaterialDAOImpl ..> MaterialJpaRepository
 OrganizacaoBO ..> OrganizacaoDAO
 OrganizacaoBO ..> ServicoDAO
 OrganizacaoBO ..> UsuarioPainelDAO
@@ -158,6 +256,20 @@ PerfilAtendidoBO ..> ServicoDAO
 PerfilAtendidoController ..> PerfilAtendidoBO
 PerfilAtendidoDAO <|.. PerfilAtendidoDAOImpl
 PerfilAtendidoDAOImpl ..> PerfilAtendidoJpaRepository
+PostoReciclagemBO ..> ColetaDAO
+PostoReciclagemBO ..> EntregaDAO
+PostoReciclagemBO ..> OrganizacaoDAO
+PostoReciclagemBO ..> PostoReciclagemDAO
+PostoReciclagemBO ..> TotemDAO
+PostoReciclagemController ..> PostoReciclagemBO
+PostoReciclagemDAO <|.. PostoReciclagemDAOImpl
+PostoReciclagemDAOImpl ..> PostoReciclagemJpaRepository
+RecompensaBO ..> OrganizacaoDAO
+RecompensaBO ..> RecompensaDAO
+RecompensaBO ..> TrocaDAO
+RecompensaController ..> RecompensaBO
+RecompensaDAO <|.. RecompensaDAOImpl
+RecompensaDAOImpl ..> RecompensaJpaRepository
 ServicoBO ..> AtualizacaoDisponibilidadeDAO
 ServicoBO ..> ConsultaTotemDAO
 ServicoBO ..> HorarioDAO
@@ -182,6 +294,13 @@ TotemController ..> MapaServicosBO
 TotemController ..> TotemBO
 TotemDAO <|.. TotemDAOImpl
 TotemDAOImpl ..> TotemJpaRepository
+TrocaBO ..> CartaoDAO
+TrocaBO ..> RecompensaDAO
+TrocaBO ..> TrocaDAO
+TrocaBO ..> UsuarioPainelDAO
+TrocaController ..> TrocaBO
+TrocaDAO <|.. TrocaDAOImpl
+TrocaDAOImpl ..> TrocaJpaRepository
 UsuarioPainelBO ..> AtualizacaoDisponibilidadeDAO
 UsuarioPainelBO ..> OrganizacaoDAO
 UsuarioPainelBO ..> UsuarioPainelDAO

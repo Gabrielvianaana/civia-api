@@ -21,6 +21,7 @@ class AtualizacaoDisponibilidadeBO <<Service>> {
 class CargaInicialBO <<Service>> {
   -tipoDAO : TipoServicoDAO
   -perfilDAO : PerfilAtendidoDAO
+  -materialDAO : MaterialDAO
   +carregarSeNecessario() : void
 }
 class ConsultaTotemBO <<Service>> {

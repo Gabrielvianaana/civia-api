@@ -36,6 +36,52 @@ classDiagram
     +excluir(id) void
     +excluirPorServico(servicoId) void
   }
+  class Cartao {
+    +int TAMANHO_CODIGO$
+    -Long id
+    -String codigo
+    -Long organizacaoEmissoraId
+    -Long cartaoAnteriorId
+    -LocalDateTime dataEmissao
+    -StatusCartao status
+    -int saldoCreditos
+    +emitir(codigo, organizacaoEmissoraId, dataEmissao)$ Cartao
+    +substituir(anterior, codigo, organizacaoEmissoraId, dataEmissao)$ Cartao
+    +reconstituir(id, codigo, organizacaoEmissoraId, cartaoAnteriorId, dataEmissao, status, saldoCreditos)$ Cartao
+    +atualizar(organizacaoEmissoraId, novoStatus) void
+    +creditar(creditos) void
+    +debitar(creditos) void
+    +garantirAtivo() void
+  }
+  class CartaoDAO {
+    <<interface>>
+    +salvar(cartao) Cartao
+    +buscarPorId(id) Optional~Cartao~
+    +buscarPorCodigo(codigo) Optional~Cartao~
+    +listar(status) List~Cartao~
+    +existePorCodigo(codigo) boolean
+    +existeSubstituto(cartaoAnteriorId) boolean
+    +excluir(id) void
+  }
+  class Coleta {
+    -Long id
+    -Long postoId
+    -Long cooperativaId
+    -BigDecimal pesoTotalKg
+    -LocalDateTime dataColeta
+    +registrar(postoId, cooperativaId, pesoTotalKg, dataColeta)$ Coleta
+    +reconstituir(id, postoId, cooperativaId, pesoTotalKg, dataColeta)$ Coleta
+    +atualizar(postoId, cooperativaId, pesoTotalKg, dataColeta) void
+  }
+  class ColetaDAO {
+    <<interface>>
+    +salvar(coleta) Coleta
+    +buscarPorId(id) Optional~Coleta~
+    +listar(postoId) List~Coleta~
+    +ultimaColetaDoPosto(postoId) Optional~LocalDateTime~
+    +existePorPosto(postoId) boolean
+    +excluir(id) void
+  }
   class ConsultaTotem {
     +int TAMANHO_CODIGO$
     -Long id
@@ -86,6 +132,31 @@ classDiagram
     -String bairro
     +formatado() String
   }
+  class Entrega {
+    +BigDecimal PESO_MAXIMO_KG$
+    -Long id
+    -Long cartaoId
+    -Long postoId
+    -Integer materialId
+    -BigDecimal pesoKg
+    -int creditosGerados
+    -LocalDateTime dataEntrega
+    +registrar(cartaoId, postoId, material, pesoKg, dataEntrega)$ Entrega
+    +reconstituir(id, cartaoId, postoId, materialId, pesoKg, creditosGerados, dataEntrega)$ Entrega
+    +corrigir(cartaoId, postoId, material, pesoKg) void
+  }
+  class EntregaDAO {
+    <<interface>>
+    +salvar(entrega) Entrega
+    +buscarPorId(id) Optional~Entrega~
+    +listar(cartaoId, postoId) List~Entrega~
+    +somarPesoDoCartao(cartaoId, inicio, fim, idIgnorado) BigDecimal
+    +somarPesoDoPosto(postoId, desde, idIgnorado) BigDecimal
+    +existePorCartao(cartaoId) boolean
+    +existePorPosto(postoId) boolean
+    +existePorMaterial(materialId) boolean
+    +excluir(id) void
+  }
   class GradeHorario {
     <<record>>
     -boolean funciona24h
@@ -117,6 +188,26 @@ classDiagram
     +existe(servicoId, diaSemana, abertura, idIgnorado) boolean
     +excluir(id) void
     +excluirPorServico(servicoId) void
+  }
+  class Material {
+    -Integer id
+    -String nome
+    -int creditosPorKg
+    -boolean aceito
+    +novo(nome, creditosPorKg, aceito)$ Material
+    +reconstituir(id, nome, creditosPorKg, aceito)$ Material
+    +atualizar(nome, creditosPorKg, aceito) void
+    +garantirAceito() void
+    +calcularCreditos(pesoKg) int
+  }
+  class MaterialDAO {
+    <<interface>>
+    +salvar(material) Material
+    +buscarPorId(id) Optional~Material~
+    +listar() List~Material~
+    +existePorNome(nome, idIgnorado) boolean
+    +contar() long
+    +excluir(id) void
   }
   class Organizacao {
     -Long id
@@ -166,6 +257,49 @@ classDiagram
     +contar() long
     +excluir(id) void
   }
+  class PostoReciclagem {
+    +BigDecimal LIMITE_DIARIO_PADRAO_KG$
+    -Long id
+    -Long totemId
+    -Long cooperativaId
+    -BigDecimal capacidadeKg
+    -BigDecimal limiteDiarioKg
+    -StatusPosto status
+    +novo(totemId, cooperativaId, capacidadeKg, limiteDiarioKg, status)$ PostoReciclagem
+    +reconstituir(id, totemId, cooperativaId, capacidadeKg, limiteDiarioKg, status)$ PostoReciclagem
+    +atualizar(totemId, cooperativaId, capacidadeKg, limiteDiarioKg, status) void
+    +garantirRecebeEntregas() void
+    +garantirCabe(acumuladoKg, pesoKg) void
+    +atualizarLotacao(acumuladoKg) void
+    +liberarAposColeta() void
+  }
+  class PostoReciclagemDAO {
+    <<interface>>
+    +salvar(posto) PostoReciclagem
+    +buscarPorId(id) Optional~PostoReciclagem~
+    +listar(status) List~PostoReciclagem~
+    +existePorTotem(totemId, idIgnorado) boolean
+    +excluir(id) void
+  }
+  class Recompensa {
+    -Long id
+    -Long organizacaoParceiraId
+    -String nome
+    -int custoCreditos
+    -boolean ativo
+    +nova(organizacaoParceiraId, nome, custoCreditos, ativo)$ Recompensa
+    +reconstituir(id, organizacaoParceiraId, nome, custoCreditos, ativo)$ Recompensa
+    +atualizar(organizacaoParceiraId, nome, custoCreditos, ativo) void
+    +garantirDisponivel() void
+  }
+  class RecompensaDAO {
+    <<interface>>
+    +salvar(recompensa) Recompensa
+    +buscarPorId(id) Optional~Recompensa~
+    +listar(ativo) List~Recompensa~
+    +existePorNome(nome, idIgnorado) boolean
+    +excluir(id) void
+  }
   class RegraNegocioVioladaException {
   }
   class Servico {
@@ -213,6 +347,11 @@ classDiagram
     APROVADO
     REPROVADO
   }
+  class StatusCartao {
+    <<enumeration>>
+    ATIVO
+    BLOQUEADO
+  }
   class StatusDisponibilidade {
     <<enumeration>>
     TEM_VAGA
@@ -227,6 +366,12 @@ classDiagram
     +getGrupoOrdenacao() int
     +exigeVagas() boolean
     +de(situacao)$ StatusDisponibilidade
+  }
+  class StatusPosto {
+    <<enumeration>>
+    ATIVO
+    CHEIO
+    MANUTENCAO
   }
   class StatusTotem {
     <<enumeration>>
@@ -285,6 +430,26 @@ classDiagram
     +existePorCodigo(codigo, idIgnorado) boolean
     +excluir(id) void
   }
+  class Troca {
+    -Long id
+    -Long cartaoId
+    -Long recompensaId
+    -Long usuarioId
+    -int creditosUsados
+    -LocalDateTime dataTroca
+    +registrar(cartaoId, recompensa, usuarioId, dataTroca)$ Troca
+    +reconstituir(id, cartaoId, recompensaId, usuarioId, creditosUsados, dataTroca)$ Troca
+    +corrigir(cartaoId, recompensa, usuarioId) void
+  }
+  class TrocaDAO {
+    <<interface>>
+    +salvar(troca) Troca
+    +buscarPorId(id) Optional~Troca~
+    +listar(cartaoId) List~Troca~
+    +existePorCartao(cartaoId) boolean
+    +existePorRecompensa(recompensaId) boolean
+    +excluir(id) void
+  }
   class UsuarioPainel {
     -Long id
     -Long organizacaoId
@@ -296,6 +461,7 @@ classDiagram
     +reconstituir(id, organizacaoId, nome, email, perfilAcesso, ativo)$ UsuarioPainel
     +atualizar(organizacaoId, nome, email, perfilAcesso, ativo) void
     +garantirPodeAtualizar(servico) void
+    +garantirPodeRegistrarTroca() void
   }
   class UsuarioPainelDAO {
     <<interface>>
@@ -311,13 +477,16 @@ classDiagram
     +textoOpcional(valor, campo, tamanhoMaximo)$ String
     +emailOpcional(valor, campo)$ String
     +obrigatorio(valor, mensagem)$ T
+    +decimalPositivo(valor, campo, maximo)$ BigDecimal
   }
   AtualizacaoDisponibilidade --> OrigemAtualizacao
   AtualizacaoDisponibilidade --> StatusDisponibilidade
+  Cartao --> StatusCartao
   DomainException <|-- DadoInvalidoException
   DomainException <|-- RegraNegocioVioladaException
   GradeHorario --> "*" Horario
   Organizacao --> TipoOrganizacao
+  PostoReciclagem --> StatusPosto
   Servico --> "*" PerfilAtendido
   Servico --> Coordenada
   Servico --> Endereco
@@ -357,6 +526,36 @@ classDiagram
   class CargaInicialBO {
     <<Service>>
   }
+  class CartaoBO {
+    <<Service>>
+  }
+  class CartaoController {
+    <<RestController>>
+  }
+  class CartaoDAO {
+    <<interface>>
+  }
+  class CartaoDAOImpl {
+    <<Repository>>
+  }
+  class CartaoJpaRepository {
+    <<interface>>
+  }
+  class ColetaBO {
+    <<Service>>
+  }
+  class ColetaController {
+    <<RestController>>
+  }
+  class ColetaDAO {
+    <<interface>>
+  }
+  class ColetaDAOImpl {
+    <<Repository>>
+  }
+  class ColetaJpaRepository {
+    <<interface>>
+  }
   class ConsultaTotemBO {
     <<Service>>
   }
@@ -378,6 +577,21 @@ classDiagram
   class DisponibilidadeBO {
     <<Component>>
   }
+  class EntregaBO {
+    <<Service>>
+  }
+  class EntregaController {
+    <<RestController>>
+  }
+  class EntregaDAO {
+    <<interface>>
+  }
+  class EntregaDAOImpl {
+    <<Repository>>
+  }
+  class EntregaJpaRepository {
+    <<interface>>
+  }
   class HorarioBO {
     <<Service>>
   }
@@ -395,6 +609,21 @@ classDiagram
   }
   class MapaServicosBO {
     <<Service>>
+  }
+  class MaterialBO {
+    <<Service>>
+  }
+  class MaterialController {
+    <<RestController>>
+  }
+  class MaterialDAO {
+    <<interface>>
+  }
+  class MaterialDAOImpl {
+    <<Repository>>
+  }
+  class MaterialJpaRepository {
+    <<interface>>
   }
   class OrganizacaoBO {
     <<Service>>
@@ -424,6 +653,36 @@ classDiagram
     <<Repository>>
   }
   class PerfilAtendidoJpaRepository {
+    <<interface>>
+  }
+  class PostoReciclagemBO {
+    <<Service>>
+  }
+  class PostoReciclagemController {
+    <<RestController>>
+  }
+  class PostoReciclagemDAO {
+    <<interface>>
+  }
+  class PostoReciclagemDAOImpl {
+    <<Repository>>
+  }
+  class PostoReciclagemJpaRepository {
+    <<interface>>
+  }
+  class RecompensaBO {
+    <<Service>>
+  }
+  class RecompensaController {
+    <<RestController>>
+  }
+  class RecompensaDAO {
+    <<interface>>
+  }
+  class RecompensaDAOImpl {
+    <<Repository>>
+  }
+  class RecompensaJpaRepository {
     <<interface>>
   }
   class ServicoBO {
@@ -471,6 +730,21 @@ classDiagram
   class TotemJpaRepository {
     <<interface>>
   }
+  class TrocaBO {
+    <<Service>>
+  }
+  class TrocaController {
+    <<RestController>>
+  }
+  class TrocaDAO {
+    <<interface>>
+  }
+  class TrocaDAOImpl {
+    <<Repository>>
+  }
+  class TrocaJpaRepository {
+    <<interface>>
+  }
   class UsuarioPainelBO {
     <<Service>>
   }
@@ -492,8 +766,23 @@ classDiagram
   AtualizacaoDisponibilidadeController ..> AtualizacaoDisponibilidadeBO
   AtualizacaoDisponibilidadeDAO <|.. AtualizacaoDisponibilidadeDAOImpl
   AtualizacaoDisponibilidadeDAOImpl ..> AtualizacaoDisponibilidadeJpaRepository
+  CargaInicialBO ..> MaterialDAO
   CargaInicialBO ..> PerfilAtendidoDAO
   CargaInicialBO ..> TipoServicoDAO
+  CartaoBO ..> CartaoDAO
+  CartaoBO ..> EntregaDAO
+  CartaoBO ..> OrganizacaoDAO
+  CartaoBO ..> TrocaDAO
+  CartaoController ..> CartaoBO
+  CartaoDAO <|.. CartaoDAOImpl
+  CartaoDAOImpl ..> CartaoJpaRepository
+  ColetaBO ..> ColetaDAO
+  ColetaBO ..> EntregaDAO
+  ColetaBO ..> OrganizacaoDAO
+  ColetaBO ..> PostoReciclagemDAO
+  ColetaController ..> ColetaBO
+  ColetaDAO <|.. ColetaDAOImpl
+  ColetaDAOImpl ..> ColetaJpaRepository
   ConsultaTotemBO ..> ConsultaTotemDAO
   ConsultaTotemBO ..> PerfilAtendidoDAO
   ConsultaTotemBO ..> ServicoDAO
@@ -503,6 +792,14 @@ classDiagram
   ConsultaTotemDAO <|.. ConsultaTotemDAOImpl
   ConsultaTotemDAOImpl ..> ConsultaTotemJpaRepository
   DataInitializer ..> CargaInicialBO
+  EntregaBO ..> CartaoDAO
+  EntregaBO ..> ColetaDAO
+  EntregaBO ..> EntregaDAO
+  EntregaBO ..> MaterialDAO
+  EntregaBO ..> PostoReciclagemDAO
+  EntregaController ..> EntregaBO
+  EntregaDAO <|.. EntregaDAOImpl
+  EntregaDAOImpl ..> EntregaJpaRepository
   HorarioBO ..> HorarioDAO
   HorarioBO ..> ServicoDAO
   HorarioController ..> HorarioBO
@@ -515,6 +812,11 @@ classDiagram
   MapaServicosBO ..> ServicoDAO
   MapaServicosBO ..> TipoServicoDAO
   MapaServicosBO ..> TotemDAO
+  MaterialBO ..> EntregaDAO
+  MaterialBO ..> MaterialDAO
+  MaterialController ..> MaterialBO
+  MaterialDAO <|.. MaterialDAOImpl
+  MaterialDAOImpl ..> MaterialJpaRepository
   OrganizacaoBO ..> OrganizacaoDAO
   OrganizacaoBO ..> ServicoDAO
   OrganizacaoBO ..> UsuarioPainelDAO
@@ -527,6 +829,20 @@ classDiagram
   PerfilAtendidoController ..> PerfilAtendidoBO
   PerfilAtendidoDAO <|.. PerfilAtendidoDAOImpl
   PerfilAtendidoDAOImpl ..> PerfilAtendidoJpaRepository
+  PostoReciclagemBO ..> ColetaDAO
+  PostoReciclagemBO ..> EntregaDAO
+  PostoReciclagemBO ..> OrganizacaoDAO
+  PostoReciclagemBO ..> PostoReciclagemDAO
+  PostoReciclagemBO ..> TotemDAO
+  PostoReciclagemController ..> PostoReciclagemBO
+  PostoReciclagemDAO <|.. PostoReciclagemDAOImpl
+  PostoReciclagemDAOImpl ..> PostoReciclagemJpaRepository
+  RecompensaBO ..> OrganizacaoDAO
+  RecompensaBO ..> RecompensaDAO
+  RecompensaBO ..> TrocaDAO
+  RecompensaController ..> RecompensaBO
+  RecompensaDAO <|.. RecompensaDAOImpl
+  RecompensaDAOImpl ..> RecompensaJpaRepository
   ServicoBO ..> AtualizacaoDisponibilidadeDAO
   ServicoBO ..> ConsultaTotemDAO
   ServicoBO ..> HorarioDAO
@@ -551,6 +867,13 @@ classDiagram
   TotemController ..> TotemBO
   TotemDAO <|.. TotemDAOImpl
   TotemDAOImpl ..> TotemJpaRepository
+  TrocaBO ..> CartaoDAO
+  TrocaBO ..> RecompensaDAO
+  TrocaBO ..> TrocaDAO
+  TrocaBO ..> UsuarioPainelDAO
+  TrocaController ..> TrocaBO
+  TrocaDAO <|.. TrocaDAOImpl
+  TrocaDAOImpl ..> TrocaJpaRepository
   UsuarioPainelBO ..> AtualizacaoDisponibilidadeDAO
   UsuarioPainelBO ..> OrganizacaoDAO
   UsuarioPainelBO ..> UsuarioPainelDAO

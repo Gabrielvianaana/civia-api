@@ -74,10 +74,10 @@ with open(os.path.join(docs, "der.md"), "w", encoding="utf-8") as f:
             "Gerado a partir do script da equipe `db/01_ddl.sql` (17 tabelas). PK = chave primaria, "
             "FK = chave estrangeira, UK = unica. Cardinalidade: `||` obrigatorio, `|o` opcional, `o{` zero ou muitos, "
             "`o|` zero ou um.\n\n"
-            "A API Java mapeia as 10 tabelas do mapa de servicos (MVP): T_ORGANIZACAO, T_TIPO_SERVICO, "
+            "A API Java mapeia as 17 tabelas: as 10 do mapa de servicos (T_ORGANIZACAO, T_TIPO_SERVICO, "
             "T_PERFIL_ATENDIDO, T_SERVICO, T_SERVICO_PERFIL, T_HORARIO, T_USUARIO_PAINEL, T_ATUALIZACAO, T_TOTEM e "
-            "T_CONSULTA_TOTEM. As tabelas do modulo de reciclagem (T_POSTO_RECICLAGEM, T_MATERIAL, T_CARTAO, "
-            "T_ENTREGA, T_RECOMPENSA, T_TROCA e T_COLETA) existem no banco e fazem parte do modelo da equipe.\n\n"
+            "T_CONSULTA_TOTEM) e as 7 do modulo de reciclagem (T_POSTO_RECICLAGEM, T_MATERIAL, T_CARTAO, "
+            "T_ENTREGA, T_RECOMPENSA, T_TROCA e T_COLETA).\n\n"
             "Os ids sao gerados pelas sequencias de `db/02_sequencias.sql` (`SQ_<TABELA>`).\n\n")
     f.write("\n".join(linhas) + "\n")
 

@@ -66,6 +66,16 @@ public class UsuarioPainel {
         }
     }
 
+    /** Trocas de creditos sao registradas pela equipe ou pelo gestor (usuario ativo), nunca pela cooperativa. */
+    public void garantirPodeRegistrarTroca() {
+        if (!ativo) {
+            throw new RegraNegocioVioladaException("O usuario " + email + " esta inativo.");
+        }
+        if (perfilAcesso == PerfilAcesso.COOPERATIVA) {
+            throw new RegraNegocioVioladaException("Usuarios de COOPERATIVA nao registram trocas de creditos.");
+        }
+    }
+
     private void definir(Long organizacaoId, String nome, String email, PerfilAcesso perfilAcesso, boolean ativo) {
         this.organizacaoId = Validacoes.obrigatorio(organizacaoId, "A organizacao do usuario e obrigatoria.");
         this.nome = Validacoes.textoObrigatorio(nome, "nome", 100);

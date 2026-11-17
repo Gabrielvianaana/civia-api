@@ -154,4 +154,61 @@ INSERT INTO T_CONSULTA_TOTEM SELECT SQ_CONSULTA_TOTEM.NEXTVAL, t.id_totem, ts.id
   FROM T_TOTEM t, T_TIPO_SERVICO ts, T_PERFIL_ATENDIDO p
  WHERE t.cd_totem = 'TOT-ANH-01' AND ts.nm_tipo_servico = 'Abrigo' AND p.ds_perfil = 'Homem';
 
+-- ---------------------------------------------------------------------
+-- Modulo de reciclagem (postos, materiais, cartoes anonimos, entregas, recompensas, trocas e coletas)
+-- ---------------------------------------------------------------------
+
+-- Postos de reciclagem acoplados aos totens, atendidos pela cooperativa (limite diario de 10 kg por cartao - RN08)
+INSERT INTO T_POSTO_RECICLAGEM SELECT SQ_POSTO_RECICLAGEM.NEXTVAL, t.id_totem, o.id_organizacao, 200, 10, 'ATIVO'
+  FROM T_TOTEM t, T_ORGANIZACAO o WHERE t.cd_totem = 'TOT-SE-01' AND o.nm_organizacao = 'Cooperativa Recicla Centro (simulada)';
+INSERT INTO T_POSTO_RECICLAGEM SELECT SQ_POSTO_RECICLAGEM.NEXTVAL, t.id_totem, o.id_organizacao, 150, 10, 'ATIVO'
+  FROM T_TOTEM t, T_ORGANIZACAO o WHERE t.cd_totem = 'TOT-ANH-01' AND o.nm_organizacao = 'Cooperativa Recicla Centro (simulada)';
+
+-- Materiais: so lata de aluminio e garrafa PET sao aceitas (RN09)
+INSERT INTO T_MATERIAL VALUES (SQ_MATERIAL.NEXTVAL, 'Lata de aluminio', 10, 'S');
+INSERT INTO T_MATERIAL VALUES (SQ_MATERIAL.NEXTVAL, 'Garrafa PET', 5, 'S');
+INSERT INTO T_MATERIAL VALUES (SQ_MATERIAL.NEXTVAL, 'Vidro', 0, 'N');
+INSERT INTO T_MATERIAL VALUES (SQ_MATERIAL.NEXTVAL, 'Papelao', 0, 'N');
+
+-- Cartoes anonimos emitidos pelo Centro POP (RN07). CVB3N8P4 foi perdido e substituido por CVC5R2T6 (RN12).
+INSERT INTO T_CARTAO SELECT SQ_CARTAO.NEXTVAL, 'CVA7K2M9', id_organizacao, NULL, SYSDATE - 20, 'ATIVO', 30
+  FROM T_ORGANIZACAO WHERE nm_organizacao = 'Centro POP Se (simulado)';
+INSERT INTO T_CARTAO SELECT SQ_CARTAO.NEXTVAL, 'CVB3N8P4', id_organizacao, NULL, SYSDATE - 15, 'BLOQUEADO', 0
+  FROM T_ORGANIZACAO WHERE nm_organizacao = 'Centro POP Se (simulado)';
+INSERT INTO T_CARTAO SELECT SQ_CARTAO.NEXTVAL, 'CVC5R2T6', o.id_organizacao, c.id_cartao, SYSDATE - 5, 'ATIVO', 33
+  FROM T_ORGANIZACAO o, T_CARTAO c WHERE o.nm_organizacao = 'Centro POP Se (simulado)' AND c.cd_cartao = 'CVB3N8P4';
+
+-- Entregas (creditos = peso x creditos por kg do material)
+INSERT INTO T_ENTREGA SELECT SQ_ENTREGA.NEXTVAL, c.id_cartao, p.id_posto, m.id_material, 2, 20, SYSDATE - 10
+  FROM T_CARTAO c, T_POSTO_RECICLAGEM p, T_TOTEM t, T_MATERIAL m
+ WHERE c.cd_cartao = 'CVB3N8P4' AND p.id_totem = t.id_totem AND t.cd_totem = 'TOT-SE-01' AND m.nm_material = 'Lata de aluminio';
+INSERT INTO T_ENTREGA SELECT SQ_ENTREGA.NEXTVAL, c.id_cartao, p.id_posto, m.id_material, 3, 30, SYSDATE - 3
+  FROM T_CARTAO c, T_POSTO_RECICLAGEM p, T_TOTEM t, T_MATERIAL m
+ WHERE c.cd_cartao = 'CVA7K2M9' AND p.id_totem = t.id_totem AND t.cd_totem = 'TOT-SE-01' AND m.nm_material = 'Lata de aluminio';
+INSERT INTO T_ENTREGA SELECT SQ_ENTREGA.NEXTVAL, c.id_cartao, p.id_posto, m.id_material, 4, 20, SYSDATE - 1
+  FROM T_CARTAO c, T_POSTO_RECICLAGEM p, T_TOTEM t, T_MATERIAL m
+ WHERE c.cd_cartao = 'CVA7K2M9' AND p.id_totem = t.id_totem AND t.cd_totem = 'TOT-ANH-01' AND m.nm_material = 'Garrafa PET';
+INSERT INTO T_ENTREGA SELECT SQ_ENTREGA.NEXTVAL, c.id_cartao, p.id_posto, m.id_material, 2.5, 13, SYSDATE - 2
+  FROM T_CARTAO c, T_POSTO_RECICLAGEM p, T_TOTEM t, T_MATERIAL m
+ WHERE c.cd_cartao = 'CVC5R2T6' AND p.id_totem = t.id_totem AND t.cd_totem = 'TOT-SE-01' AND m.nm_material = 'Garrafa PET';
+
+-- Catalogo de recompensas (somente itens extras - RN11), doado pelo parceiro
+INSERT INTO T_RECOMPENSA SELECT SQ_RECOMPENSA.NEXTVAL, id_organizacao, 'Kit de higiene (simulado)', 20, 'S'
+  FROM T_ORGANIZACAO WHERE nm_organizacao = 'Parceiro Agasalho Amigo (simulado)';
+INSERT INTO T_RECOMPENSA SELECT SQ_RECOMPENSA.NEXTVAL, id_organizacao, 'Par de meias (simulado)', 8, 'S'
+  FROM T_ORGANIZACAO WHERE nm_organizacao = 'Parceiro Agasalho Amigo (simulado)';
+INSERT INTO T_RECOMPENSA SELECT SQ_RECOMPENSA.NEXTVAL, id_organizacao, 'Cobertor (simulado)', 40, 'S'
+  FROM T_ORGANIZACAO WHERE nm_organizacao = 'Parceiro Agasalho Amigo (simulado)';
+INSERT INTO T_RECOMPENSA SELECT SQ_RECOMPENSA.NEXTVAL, id_organizacao, 'Capa de chuva (simulado)', 25, 'N'
+  FROM T_ORGANIZACAO WHERE nm_organizacao = 'Parceiro Agasalho Amigo (simulado)';
+
+-- Troca registrada pela equipe do Centro POP (CVA7K2M9: 50 creditos ganhos - 20 = saldo 30)
+INSERT INTO T_TROCA SELECT SQ_TROCA.NEXTVAL, c.id_cartao, r.id_recompensa, u.id_usuario, 20, SYSDATE - 1/2
+  FROM T_CARTAO c, T_RECOMPENSA r, T_USUARIO_PAINEL u
+ WHERE c.cd_cartao = 'CVA7K2M9' AND r.nm_recompensa = 'Kit de higiene (simulado)' AND u.ds_email = 'ana.equipe@civia.exemplo.org';
+
+-- Coleta da cooperativa no posto da Se (antes das entregas mais recentes)
+INSERT INTO T_COLETA SELECT SQ_COLETA.NEXTVAL, p.id_posto, p.id_cooperativa, 35.5, SYSDATE - 7
+  FROM T_POSTO_RECICLAGEM p, T_TOTEM t WHERE p.id_totem = t.id_totem AND t.cd_totem = 'TOT-SE-01';
+
 COMMIT;

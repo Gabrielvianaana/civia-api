@@ -1,0 +1,120 @@
+@startuml
+title CIVIA - Reciclagem: DTOs (records de entrada e saida)
+' Gerado a partir do codigo-fonte Java (pasta civia-*/src/main/java).
+!pragma layout smetana
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam dpi 150
+hide empty members
+top to bottom direction
+class CartaoAtualizacaoRequest <<record>> {
+  -organizacaoEmissoraId : Long
+  -status : String
+}
+class CartaoRequest <<record>> {
+  -organizacaoEmissoraId : Long
+  -cartaoAnteriorId : Long
+}
+class CartaoResponse <<record>> {
+  -id : Long
+  -codigo : String
+  -organizacaoEmissoraId : Long
+  -cartaoAnteriorId : Long
+  -dataEmissao : LocalDateTime
+  -status : String
+  -saldoCreditos : int
+}
+class ColetaRequest <<record>> {
+  -postoId : Long
+  -cooperativaId : Long
+  -pesoTotalKg : BigDecimal
+  -dataColeta : LocalDateTime
+}
+class ColetaResponse <<record>> {
+  -id : Long
+  -postoId : Long
+  -cooperativaId : Long
+  -pesoTotalKg : BigDecimal
+  -dataColeta : LocalDateTime
+}
+class EntregaRequest <<record>> {
+  -codigoCartao : String
+  -postoId : Long
+  -materialId : Integer
+  -pesoKg : BigDecimal
+}
+class EntregaResponse <<record>> {
+  -id : Long
+  -cartaoId : Long
+  -postoId : Long
+  -materialId : Integer
+  -pesoKg : BigDecimal
+  -creditosGerados : int
+  -dataEntrega : LocalDateTime
+}
+class MaterialRequest <<record>> {
+  -nome : String
+  -creditosPorKg : Integer
+  -aceito : Boolean
+}
+class MaterialResponse <<record>> {
+  -id : Integer
+  -nome : String
+  -creditosPorKg : int
+  -aceito : boolean
+}
+class PostoReciclagemRequest <<record>> {
+  -totemId : Long
+  -cooperativaId : Long
+  -capacidadeKg : BigDecimal
+  -limiteDiarioKg : BigDecimal
+  -status : String
+}
+class PostoReciclagemResponse <<record>> {
+  -id : Long
+  -totemId : Long
+  -cooperativaId : Long
+  -capacidadeKg : BigDecimal
+  -limiteDiarioKg : BigDecimal
+  -status : String
+  -materialAcumuladoKg : BigDecimal
+}
+class RecompensaRequest <<record>> {
+  -organizacaoParceiraId : Long
+  -nome : String
+  -custoCreditos : Integer
+  -ativo : Boolean
+}
+class RecompensaResponse <<record>> {
+  -id : Long
+  -organizacaoParceiraId : Long
+  -nome : String
+  -custoCreditos : int
+  -ativo : boolean
+}
+class TrocaRequest <<record>> {
+  -codigoCartao : String
+  -recompensaId : Long
+  -usuarioId : Long
+}
+class TrocaResponse <<record>> {
+  -id : Long
+  -cartaoId : Long
+  -recompensaId : Long
+  -usuarioId : Long
+  -creditosUsados : int
+  -dataTroca : LocalDateTime
+}
+CartaoAtualizacaoRequest -[hidden]down- ColetaRequest
+CartaoRequest -[hidden]down- ColetaResponse
+CartaoResponse -[hidden]down- EntregaRequest
+ColetaRequest -[hidden]down- EntregaResponse
+ColetaResponse -[hidden]down- MaterialRequest
+EntregaRequest -[hidden]down- MaterialResponse
+EntregaResponse -[hidden]down- PostoReciclagemRequest
+MaterialRequest -[hidden]down- PostoReciclagemResponse
+MaterialResponse -[hidden]down- RecompensaRequest
+PostoReciclagemRequest -[hidden]down- RecompensaResponse
+PostoReciclagemResponse -[hidden]down- TrocaRequest
+RecompensaRequest -[hidden]down- TrocaResponse
+@enduml

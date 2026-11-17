@@ -1,0 +1,85 @@
+@startuml
+title CIVIA - Reciclagem: entidades JPA e mapper
+' Gerado a partir do codigo-fonte Java (pasta civia-*/src/main/java).
+!pragma layout smetana
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam dpi 150
+hide empty members
+top to bottom direction
+class CartaoEntity <<Entity>> {
+  -id : Long
+  -codigo : String
+  -organizacaoEmissoraId : Long
+  -cartaoAnteriorId : Long
+  -dataEmissao : LocalDateTime
+  -status : StatusCartao
+  -saldoCreditos : Integer
+}
+class ColetaEntity <<Entity>> {
+  -id : Long
+  -postoId : Long
+  -cooperativaId : Long
+  -pesoTotalKg : BigDecimal
+  -dataColeta : LocalDateTime
+}
+class EntregaEntity <<Entity>> {
+  -id : Long
+  -cartaoId : Long
+  -postoId : Long
+  -materialId : Integer
+  -pesoKg : BigDecimal
+  -creditosGerados : Integer
+  -dataEntrega : LocalDateTime
+}
+class MaterialEntity <<Entity>> {
+  -id : Integer
+  -nome : String
+  -creditosPorKg : Integer
+  -aceito : Boolean
+}
+class PostoReciclagemEntity <<Entity>> {
+  -id : Long
+  -totemId : Long
+  -cooperativaId : Long
+  -capacidadeKg : BigDecimal
+  -limiteDiarioKg : BigDecimal
+  -status : StatusPosto
+}
+class RecompensaEntity <<Entity>> {
+  -id : Long
+  -organizacaoParceiraId : Long
+  -nome : String
+  -custoCreditos : Integer
+  -ativo : Boolean
+}
+class TrocaEntity <<Entity>> {
+  -id : Long
+  -cartaoId : Long
+  -recompensaId : Long
+  -usuarioId : Long
+  -creditosUsados : Integer
+  -dataTroca : LocalDateTime
+}
+class ReciclagemPersistenceMapper {
+  +{static} paraDominio(e) : PostoReciclagem
+  +{static} copiar(p, e) : void
+  +{static} paraDominio(e) : Material
+  +{static} copiar(m, e) : void
+  +{static} paraDominio(e) : Cartao
+  +{static} copiar(c, e) : void
+  +{static} paraDominio(e) : Entrega
+  +{static} copiar(en, e) : void
+  +{static} paraDominio(e) : Recompensa
+  +{static} copiar(r, e) : void
+  +{static} paraDominio(e) : Troca
+  +{static} copiar(t, e) : void
+  +{static} paraDominio(e) : Coleta
+  +{static} copiar(c, e) : void
+}
+CartaoEntity -[hidden]down- MaterialEntity
+ColetaEntity -[hidden]down- PostoReciclagemEntity
+EntregaEntity -[hidden]down- RecompensaEntity
+MaterialEntity -[hidden]down- TrocaEntity
+PostoReciclagemEntity -[hidden]down- ReciclagemPersistenceMapper
+@enduml

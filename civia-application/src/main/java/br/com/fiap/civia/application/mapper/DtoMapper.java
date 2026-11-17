@@ -1,6 +1,12 @@
 package br.com.fiap.civia.application.mapper;
 
 import br.com.fiap.civia.application.dto.AtualizacaoDisponibilidadeResponse;
+import br.com.fiap.civia.application.dto.TrocaResponse;
+import br.com.fiap.civia.application.dto.RecompensaResponse;
+import br.com.fiap.civia.application.dto.MaterialResponse;
+import br.com.fiap.civia.application.dto.EntregaResponse;
+import br.com.fiap.civia.application.dto.ColetaResponse;
+import br.com.fiap.civia.application.dto.CartaoResponse;
 import br.com.fiap.civia.application.dto.ConsultaTotemResponse;
 import br.com.fiap.civia.application.dto.HorarioResponse;
 import br.com.fiap.civia.application.dto.OrganizacaoResponse;
@@ -10,6 +16,12 @@ import br.com.fiap.civia.application.dto.TipoServicoResponse;
 import br.com.fiap.civia.application.dto.TotemResponse;
 import br.com.fiap.civia.application.dto.UsuarioPainelResponse;
 import br.com.fiap.civia.domain.model.AtualizacaoDisponibilidade;
+import br.com.fiap.civia.domain.model.Troca;
+import br.com.fiap.civia.domain.model.Recompensa;
+import br.com.fiap.civia.domain.model.Material;
+import br.com.fiap.civia.domain.model.Entrega;
+import br.com.fiap.civia.domain.model.Coleta;
+import br.com.fiap.civia.domain.model.Cartao;
 import br.com.fiap.civia.domain.model.ConsultaTotem;
 import br.com.fiap.civia.domain.model.Horario;
 import br.com.fiap.civia.domain.model.Organizacao;
@@ -71,5 +83,32 @@ public final class DtoMapper {
         return new ConsultaTotemResponse(c.getId(), c.getTotemId(), c.getTipoServicoId(), c.getPerfilId(),
                 c.getServicoEscolhidoId(), c.getDataConsulta(), c.isImprimiuRota(), c.isPediuAbordagem(),
                 c.getCodigoChegada(), c.getDataChegada());
+    }
+
+    public static MaterialResponse paraResponse(Material m) {
+        return new MaterialResponse(m.getId(), m.getNome(), m.getCreditosPorKg(), m.isAceito());
+    }
+
+    public static CartaoResponse paraResponse(Cartao c) {
+        return new CartaoResponse(c.getId(), c.getCodigo(), c.getOrganizacaoEmissoraId(), c.getCartaoAnteriorId(),
+                c.getDataEmissao(), c.getStatus().name(), c.getSaldoCreditos());
+    }
+
+    public static EntregaResponse paraResponse(Entrega e) {
+        return new EntregaResponse(e.getId(), e.getCartaoId(), e.getPostoId(), e.getMaterialId(), e.getPesoKg(),
+                e.getCreditosGerados(), e.getDataEntrega());
+    }
+
+    public static RecompensaResponse paraResponse(Recompensa r) {
+        return new RecompensaResponse(r.getId(), r.getOrganizacaoParceiraId(), r.getNome(), r.getCustoCreditos(), r.isAtivo());
+    }
+
+    public static TrocaResponse paraResponse(Troca t) {
+        return new TrocaResponse(t.getId(), t.getCartaoId(), t.getRecompensaId(), t.getUsuarioId(), t.getCreditosUsados(),
+                t.getDataTroca());
+    }
+
+    public static ColetaResponse paraResponse(Coleta c) {
+        return new ColetaResponse(c.getId(), c.getPostoId(), c.getCooperativaId(), c.getPesoTotalKg(), c.getDataColeta());
     }
 }

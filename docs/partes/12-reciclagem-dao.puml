@@ -1,0 +1,71 @@
+@startuml
+title CIVIA - Reciclagem: DAO (dominio) <- DAOImpl (infraestrutura) -> JpaRepository
+' Gerado a partir do codigo-fonte Java (pasta civia-*/src/main/java).
+!pragma layout smetana
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam dpi 150
+hide empty members
+interface CartaoDAO {
+}
+class CartaoDAOImpl <<Repository>> {
+}
+interface CartaoJpaRepository {
+}
+CartaoDAO <|.right. CartaoDAOImpl
+CartaoDAOImpl .right.> CartaoJpaRepository
+interface ColetaDAO {
+}
+class ColetaDAOImpl <<Repository>> {
+}
+interface ColetaJpaRepository {
+}
+ColetaDAO <|.right. ColetaDAOImpl
+ColetaDAOImpl .right.> ColetaJpaRepository
+CartaoDAO -[hidden]down- ColetaDAO
+interface EntregaDAO {
+}
+class EntregaDAOImpl <<Repository>> {
+}
+interface EntregaJpaRepository {
+}
+EntregaDAO <|.right. EntregaDAOImpl
+EntregaDAOImpl .right.> EntregaJpaRepository
+ColetaDAO -[hidden]down- EntregaDAO
+interface MaterialDAO {
+}
+class MaterialDAOImpl <<Repository>> {
+}
+interface MaterialJpaRepository {
+}
+MaterialDAO <|.right. MaterialDAOImpl
+MaterialDAOImpl .right.> MaterialJpaRepository
+EntregaDAO -[hidden]down- MaterialDAO
+interface PostoReciclagemDAO {
+}
+class PostoReciclagemDAOImpl <<Repository>> {
+}
+interface PostoReciclagemJpaRepository {
+}
+PostoReciclagemDAO <|.right. PostoReciclagemDAOImpl
+PostoReciclagemDAOImpl .right.> PostoReciclagemJpaRepository
+MaterialDAO -[hidden]down- PostoReciclagemDAO
+interface RecompensaDAO {
+}
+class RecompensaDAOImpl <<Repository>> {
+}
+interface RecompensaJpaRepository {
+}
+RecompensaDAO <|.right. RecompensaDAOImpl
+RecompensaDAOImpl .right.> RecompensaJpaRepository
+PostoReciclagemDAO -[hidden]down- RecompensaDAO
+interface TrocaDAO {
+}
+class TrocaDAOImpl <<Repository>> {
+}
+interface TrocaJpaRepository {
+}
+TrocaDAO <|.right. TrocaDAOImpl
+TrocaDAOImpl .right.> TrocaJpaRepository
+RecompensaDAO -[hidden]down- TrocaDAO
+@enduml

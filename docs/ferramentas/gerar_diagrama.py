@@ -302,7 +302,16 @@ def parte(arquivo, titulo, nomes, completo=True, colunas=3, relacoes_extra=True)
 
 
 os.makedirs(os.path.join(DOCS, "partes"), exist_ok=True)
-DAOS = [n for n, c in classes.items() if c["pacote"].endswith("domain.dao")]
+# Modulo de reciclagem: partes proprias (11 a 16), para as partes 01 a 10 continuarem cabendo em uma pagina
+BASES_RECICLAGEM = ("PostoReciclagem", "Material", "Cartao", "Entrega", "Recompensa", "Troca", "Coleta")
+
+
+def eh_reciclagem(nome):
+    return nome.startswith(BASES_RECICLAGEM) or nome in ("StatusPosto", "StatusCartao", "ReciclagemPersistenceMapper")
+
+
+TODOS_DAOS = [n for n, c in classes.items() if c["pacote"].endswith("domain.dao")]
+DAOS = [n for n in TODOS_DAOS if not eh_reciclagem(n)]
 parte("01-dominio-servico.puml", "CIVIA - Dominio: servico, tipo, perfil e horarios",
       ["Servico", "TipoServico", "PerfilAtendido", "Horario", "GradeHorario", "StatusAprovacao", "Endereco",
        "Coordenada", "Validacoes"])
@@ -312,13 +321,13 @@ parte("02-dominio-disponibilidade.puml", "CIVIA - Dominio: disponibilidade, usua
 parte("03-dominio-totem.puml", "CIVIA - Dominio: totem e consultas",
       ["Totem", "ConsultaTotem", "StatusTotem", "Endereco", "Coordenada"])
 parte("04-dominio-dao.puml", "CIVIA - Interfaces DAO (dominio)", sorted(DAOS), colunas=2)
-def parte_dao(arquivo, titulo):
+def parte_dao(arquivo, titulo, daos):
     """Uma linha por agregado: DAO (dominio) <|.. DAOImpl (infraestrutura) ..> JpaRepository."""
     linhas = ["@startuml", f"title {titulo}", "' Gerado a partir do codigo-fonte Java (pasta civia-*/src/main/java).",
               "!pragma layout smetana", "skinparam classAttributeIconSize 0", "skinparam shadowing false",
               "skinparam dpi 150", "hide empty members"]
     anterior = None
-    for dao in sorted(DAOS):
+    for dao in sorted(daos):
         impl, jpa = dao + "Impl", dao.replace("DAO", "JpaRepository")
         for n in (dao, impl, jpa):
             linhas += bloco_classe(classes[n], False)
@@ -332,21 +341,42 @@ def parte_dao(arquivo, titulo):
         f.write("\n".join(linhas) + "\n")
 
 
-parte_dao("05-dao-implementacoes.puml", "CIVIA - DAO: interface (dominio) <- DAOImpl (infraestrutura) -> JpaRepository")
+parte_dao("05-dao-implementacoes.puml", "CIVIA - DAO: interface (dominio) <- DAOImpl (infraestrutura) -> JpaRepository", DAOS)
 PARES = []
-for ctrl in sorted(n for n in classes if n.endswith("Controller")):
+for ctrl in sorted(n for n in classes if n.endswith("Controller") and not eh_reciclagem(n)):
     bo = ctrl.replace("Controller", "BO")
     PARES += [ctrl, bo]
 PARES += ["MapaServicosBO", "DisponibilidadeBO", "DataInitializer", "CargaInicialBO"]
 parte("06-controllers-bos.puml", "CIVIA - Controllers e BOs (regras de negocio)", PARES, completo=False, colunas=2)
 parte("07-bos-detalhe.puml", "CIVIA - BOs com metodos",
-      sorted(n for n in classes if n.endswith("BO")) + ["Disponibilidade"], colunas=2, relacoes_extra=False)
+      sorted(n for n in classes if n.endswith("BO") and not eh_reciclagem(n)) + ["Disponibilidade"], colunas=2,
+      relacoes_extra=False)
 parte("08-excecoes.puml", "CIVIA - Tratamento de excecoes",
       ["DomainException", "DadoInvalidoException", "RegraNegocioVioladaException", "TradutorExcecaoDominio",
        "DadosInvalidosException", "RegraNegocioException", "RecursoNaoEncontradoException", "ConflitoException",
        "GlobalExceptionHandler"], colunas=2)
 parte("09-entidades-jpa.puml", "CIVIA - Entidades JPA (mapeamento das tabelas Oracle)",
-      sorted(n for n in classes if n.endswith("Entity")) + ["HoraConverter", "SimNaoConverter"], colunas=3)
+      sorted(n for n in classes if n.endswith("Entity") and not eh_reciclagem(n)) + ["HoraConverter", "SimNaoConverter"],
+      colunas=3)
 parte("10-dtos.puml", "CIVIA - DTOs (records de entrada e saida)",
-      sorted(n for n in classes if n.endswith(("Request", "Response"))), colunas=4)
+      sorted(n for n in classes if n.endswith(("Request", "Response")) and not eh_reciclagem(n)), colunas=4)
+
+DAOS_RECICLAGEM = [n for n in TODOS_DAOS if eh_reciclagem(n)]
+parte("11-reciclagem-dominio.puml", "CIVIA - Dominio: reciclagem (postos, materiais, cartoes, entregas, trocas e coletas)",
+      ["PostoReciclagem", "StatusPosto", "Material", "Cartao", "StatusCartao", "Entrega", "Recompensa", "Troca",
+       "Coleta"])
+parte_dao("12-reciclagem-dao.puml", "CIVIA - Reciclagem: DAO (dominio) <- DAOImpl (infraestrutura) -> JpaRepository",
+          DAOS_RECICLAGEM)
+PARES_RECICLAGEM = []
+for ctrl in sorted(n for n in classes if n.endswith("Controller") and eh_reciclagem(n)):
+    PARES_RECICLAGEM += [ctrl, ctrl.replace("Controller", "BO")]
+parte("13-reciclagem-controllers-bos.puml", "CIVIA - Reciclagem: Controllers e BOs", PARES_RECICLAGEM, completo=False,
+      colunas=2)
+parte("14-reciclagem-bos-detalhe.puml", "CIVIA - Reciclagem: BOs com metodos (RN07 a RN12)",
+      sorted(n for n in classes if n.endswith("BO") and eh_reciclagem(n)), colunas=2, relacoes_extra=False)
+parte("15-reciclagem-entidades-jpa.puml", "CIVIA - Reciclagem: entidades JPA e mapper",
+      sorted(n for n in classes if n.endswith("Entity") and eh_reciclagem(n)) + ["ReciclagemPersistenceMapper"],
+      colunas=3)
+parte("16-reciclagem-dtos.puml", "CIVIA - Reciclagem: DTOs (records de entrada e saida)",
+      sorted(n for n in classes if n.endswith(("Request", "Response")) and eh_reciclagem(n)), colunas=3)
 print("partes geradas em docs/partes")

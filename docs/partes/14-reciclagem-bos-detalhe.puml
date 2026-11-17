@@ -1,0 +1,97 @@
+@startuml
+title CIVIA - Reciclagem: BOs com metodos (RN07 a RN12)
+' Gerado a partir do codigo-fonte Java (pasta civia-*/src/main/java).
+!pragma layout smetana
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam dpi 150
+hide empty members
+top to bottom direction
+class CartaoBO <<Service>> {
+  -cartaoDAO : CartaoDAO
+  -organizacaoDAO : OrganizacaoDAO
+  -entregaDAO : EntregaDAO
+  -trocaDAO : TrocaDAO
+  -clock : Clock
+  -random : RandomGenerator
+  +listar(status) : List<CartaoResponse>
+  +buscar(id) : CartaoResponse
+  +buscarPorCodigo(codigo) : CartaoResponse
+  +emitir(r) : CartaoResponse
+  +atualizar(id, r) : CartaoResponse
+  +excluir(id) : void
+}
+class ColetaBO <<Service>> {
+  -coletaDAO : ColetaDAO
+  -postoDAO : PostoReciclagemDAO
+  -organizacaoDAO : OrganizacaoDAO
+  -entregaDAO : EntregaDAO
+  -clock : Clock
+  +listar(postoId) : List<ColetaResponse>
+  +buscar(id) : ColetaResponse
+  +registrar(r) : ColetaResponse
+  +atualizar(id, r) : ColetaResponse
+  +excluir(id) : void
+}
+class EntregaBO <<Service>> {
+  -entregaDAO : EntregaDAO
+  -cartaoDAO : CartaoDAO
+  -postoDAO : PostoReciclagemDAO
+  -materialDAO : MaterialDAO
+  -coletaDAO : ColetaDAO
+  -clock : Clock
+  +listar(cartaoId, postoId) : List<EntregaResponse>
+  +buscar(id) : EntregaResponse
+  +registrar(r) : EntregaResponse
+  +atualizar(id, r) : EntregaResponse
+  +excluir(id) : void
+}
+class MaterialBO <<Service>> {
+  -materialDAO : MaterialDAO
+  -entregaDAO : EntregaDAO
+  +listar() : List<MaterialResponse>
+  +buscar(id) : MaterialResponse
+  +cadastrar(r) : MaterialResponse
+  +atualizar(id, r) : MaterialResponse
+  +excluir(id) : void
+}
+class PostoReciclagemBO <<Service>> {
+  -postoDAO : PostoReciclagemDAO
+  -totemDAO : TotemDAO
+  -organizacaoDAO : OrganizacaoDAO
+  -entregaDAO : EntregaDAO
+  -coletaDAO : ColetaDAO
+  +listar(status) : List<PostoReciclagemResponse>
+  +buscar(id) : PostoReciclagemResponse
+  +cadastrar(r) : PostoReciclagemResponse
+  +atualizar(id, r) : PostoReciclagemResponse
+  +excluir(id) : void
+}
+class RecompensaBO <<Service>> {
+  -recompensaDAO : RecompensaDAO
+  -organizacaoDAO : OrganizacaoDAO
+  -trocaDAO : TrocaDAO
+  +listar(ativo) : List<RecompensaResponse>
+  +buscar(id) : RecompensaResponse
+  +cadastrar(r) : RecompensaResponse
+  +atualizar(id, r) : RecompensaResponse
+  +excluir(id) : void
+}
+class TrocaBO <<Service>> {
+  -trocaDAO : TrocaDAO
+  -cartaoDAO : CartaoDAO
+  -recompensaDAO : RecompensaDAO
+  -usuarioDAO : UsuarioPainelDAO
+  -clock : Clock
+  +listar(cartaoId) : List<TrocaResponse>
+  +buscar(id) : TrocaResponse
+  +registrar(r) : TrocaResponse
+  +atualizar(id, r) : TrocaResponse
+  +excluir(id) : void
+}
+CartaoBO -[hidden]down- EntregaBO
+ColetaBO -[hidden]down- MaterialBO
+EntregaBO -[hidden]down- PostoReciclagemBO
+MaterialBO -[hidden]down- RecompensaBO
+PostoReciclagemBO -[hidden]down- TrocaBO
+@enduml
