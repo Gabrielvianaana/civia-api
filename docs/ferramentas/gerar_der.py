@@ -78,7 +78,7 @@ with open(os.path.join(docs, "der.md"), "w", encoding="utf-8") as f:
             "T_PERFIL_ATENDIDO, T_SERVICO, T_SERVICO_PERFIL, T_HORARIO, T_USUARIO_PAINEL, T_ATUALIZACAO, T_TOTEM e "
             "T_CONSULTA_TOTEM. As tabelas do modulo de reciclagem (T_POSTO_RECICLAGEM, T_MATERIAL, T_CARTAO, "
             "T_ENTREGA, T_RECOMPENSA, T_TROCA e T_COLETA) existem no banco e fazem parte do modelo da equipe.\n\n"
-            "Os ids sao gerados pelas sequencias de `db/02_sequencias.sql` (SQ_<TABELA>).\n\n")
+            "Os ids sao gerados pelas sequencias de `db/02_sequencias.sql` (`SQ_<TABELA>`).\n\n")
     f.write("\n".join(linhas) + "\n")
 
 # PlantUML (notacao IE)

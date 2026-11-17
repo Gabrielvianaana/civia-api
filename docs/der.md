@@ -4,7 +4,7 @@ Gerado a partir do script da equipe `db/01_ddl.sql` (17 tabelas). PK = chave pri
 
 A API Java mapeia as 10 tabelas do mapa de servicos (MVP): T_ORGANIZACAO, T_TIPO_SERVICO, T_PERFIL_ATENDIDO, T_SERVICO, T_SERVICO_PERFIL, T_HORARIO, T_USUARIO_PAINEL, T_ATUALIZACAO, T_TOTEM e T_CONSULTA_TOTEM. As tabelas do modulo de reciclagem (T_POSTO_RECICLAGEM, T_MATERIAL, T_CARTAO, T_ENTREGA, T_RECOMPENSA, T_TROCA e T_COLETA) existem no banco e fazem parte do modelo da equipe.
 
-Os ids sao gerados pelas sequencias de `db/02_sequencias.sql` (SQ_<TABELA>).
+Os ids sao gerados pelas sequencias de `db/02_sequencias.sql` (`SQ_<TABELA>`).
 
 ```mermaid
 erDiagram
