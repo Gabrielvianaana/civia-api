@@ -23,13 +23,20 @@ spring:
       connection-timeout: 20000
   jpa:
     hibernate:
-      ddl-auto: none
+      # As tabelas sao criadas pelo script db/01_ddl.sql; o Hibernate apenas confere
+      # se o modelo (entidades) bate com as tabelas do Oracle.
+      ddl-auto: validate
     open-in-view: false
     show-sql: false
     properties:
       hibernate:
         jdbc:
           time_zone: America/Sao_Paulo
+
+civia:
+  carga-inicial:
+    # Carrega dados simulados de demonstracao quando as tabelas estao vazias
+    habilitada: ${CIVIA_CARGA_INICIAL:true}
 
 management:
   endpoints:
