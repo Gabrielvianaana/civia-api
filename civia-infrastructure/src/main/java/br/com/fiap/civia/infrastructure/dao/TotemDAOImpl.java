@@ -4,56 +4,46 @@ import br.com.fiap.civia.domain.dao.TotemDAO;
 import br.com.fiap.civia.domain.model.Totem;
 import br.com.fiap.civia.infrastructure.entity.TotemEntity;
 import br.com.fiap.civia.infrastructure.jpa.TotemJpaRepository;
-import br.com.fiap.civia.infrastructure.mapper.TotemPersistenceMapper;
+import br.com.fiap.civia.infrastructure.mapper.OperacaoPersistenceMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 
-/** Implementacao do TotemDAO com Spring Data JPA sobre o Oracle. */
+/** DAO de T_TOTEM. */
 @Repository
 @RequiredArgsConstructor
 public class TotemDAOImpl implements TotemDAO {
 
-    private final TotemJpaRepository jpaRepository;
+    private final TotemJpaRepository jpa;
 
     @Override
     public Totem salvar(Totem totem) {
-        TotemEntity entity = totem.getId() == null
-                ? new TotemEntity()
-                : jpaRepository.findById(totem.getId()).orElseGet(TotemEntity::new);
-        TotemPersistenceMapper.copiarParaEntidade(totem, entity);
-        return TotemPersistenceMapper.paraDominio(jpaRepository.saveAndFlush(entity));
+        TotemEntity e = totem.getId() == null ? new TotemEntity()
+                : jpa.findById(totem.getId()).orElseGet(TotemEntity::new);
+        OperacaoPersistenceMapper.copiar(totem, e);
+        return OperacaoPersistenceMapper.paraDominio(jpa.saveAndFlush(e));
     }
 
     @Override
     public Optional<Totem> buscarPorId(Long id) {
-        return jpaRepository.findById(id).map(TotemPersistenceMapper::paraDominio);
+        return jpa.findById(id).map(OperacaoPersistenceMapper::paraDominio);
     }
 
     @Override
     public List<Totem> listar() {
-        return jpaRepository.findAllByOrderByIdAsc().stream().map(TotemPersistenceMapper::paraDominio).toList();
+        return jpa.findAllByOrderByIdAsc().stream().map(OperacaoPersistenceMapper::paraDominio).toList();
     }
 
     @Override
-    public boolean existePorIdentificacao(String identificacao) {
-        return jpaRepository.existsByIdentificacaoIgnoreCase(identificacao);
-    }
-
-    @Override
-    public boolean existePorIdentificacaoEmOutroTotem(String identificacao, Long idTotem) {
-        return jpaRepository.existsByIdentificacaoIgnoreCaseAndIdNot(identificacao, idTotem);
-    }
-
-    @Override
-    public long contar() {
-        return jpaRepository.count();
+    public boolean existePorCodigo(String codigo, Long idIgnorado) {
+        return idIgnorado == null ? jpa.existsByCodigoIgnoreCase(codigo) : jpa.existsByCodigoIgnoreCaseAndIdNot(codigo, idIgnorado);
     }
 
     @Override
     public void excluir(Long id) {
-        jpaRepository.deleteById(id);
+        jpa.deleteById(id);
+        jpa.flush();
     }
 }

@@ -1,45 +1,49 @@
 package br.com.fiap.civia.infrastructure.mapper;
 
+import br.com.fiap.civia.domain.model.PerfilAtendido;
 import br.com.fiap.civia.domain.model.Servico;
-import br.com.fiap.civia.domain.valueobject.Coordenada;
-import br.com.fiap.civia.domain.valueobject.HorarioFuncionamento;
+import br.com.fiap.civia.domain.valueobject.Endereco;
 import br.com.fiap.civia.infrastructure.entity.ServicoEntity;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
-import java.util.HashSet;
+import java.util.Comparator;
+import java.util.LinkedHashSet;
+import java.util.stream.Collectors;
 
-/** Traduz entre o modelo relacional (JPA) e o modelo de dominio puro. */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ServicoPersistenceMapper {
 
-    public static Servico paraDominio(ServicoEntity entity) {
+    public static Servico paraDominio(ServicoEntity e) {
         return Servico.reconstituir(
-                entity.getId(),
-                entity.getNome(),
-                entity.getTipo(),
-                entity.getEndereco(),
-                new Coordenada(entity.getLatitude().doubleValue(), entity.getLongitude().doubleValue()),
-                new HorarioFuncionamento(entity.getHoraAbertura(), entity.getHoraFechamento()),
-                entity.getPerfis(),
-                Boolean.TRUE.equals(entity.getAprovado()),
-                entity.getDataCadastro());
+                e.getId(),
+                e.getOrganizacaoId(),
+                ReferenciaPersistenceMapper.paraDominio(e.getTipo()),
+                e.getNome(),
+                new Endereco(e.getLogradouro(), e.getNumero(), e.getBairro()),
+                CoordenadaMapper.paraDominio(e.getLatitude(), e.getLongitude()),
+                e.getCapacidade(),
+                Boolean.TRUE.equals(e.getFunciona24h()),
+                e.getStatusAprovacao(),
+                e.getDataCadastro(),
+                e.getPerfis().stream()
+                        .map(ReferenciaPersistenceMapper::paraDominio)
+                        .sorted(Comparator.comparing(PerfilAtendido::getId))
+                        .collect(Collectors.toCollection(LinkedHashSet::new)));
     }
 
-    public static void copiarParaEntidade(Servico servico, ServicoEntity entity) {
-        entity.setNome(servico.getNome());
-        entity.setTipo(servico.getTipo());
-        entity.setEndereco(servico.getEndereco());
-        entity.setLatitude(CoordenadaMapper.paraDecimal(servico.getCoordenada().latitude()));
-        entity.setLongitude(CoordenadaMapper.paraDecimal(servico.getCoordenada().longitude()));
-        entity.setHoraAbertura(servico.getHorario().abertura());
-        entity.setHoraFechamento(servico.getHorario().fechamento());
-        entity.setAprovado(servico.isAprovado());
-        entity.setDataCadastro(servico.getDataCadastro());
-        if (entity.getPerfis() == null) {
-            entity.setPerfis(new HashSet<>());
-        }
-        entity.getPerfis().clear();
-        entity.getPerfis().addAll(servico.getPerfis());
+    /** Copia os campos simples; tipo e perfis sao associados pelo DAO (referencias JPA). */
+    public static void copiar(Servico s, ServicoEntity e) {
+        e.setOrganizacaoId(s.getOrganizacaoId());
+        e.setNome(s.getNome());
+        e.setLogradouro(s.getEndereco().logradouro());
+        e.setNumero(s.getEndereco().numero());
+        e.setBairro(s.getEndereco().bairro());
+        e.setLatitude(CoordenadaMapper.paraDecimal(s.getCoordenada().latitude()));
+        e.setLongitude(CoordenadaMapper.paraDecimal(s.getCoordenada().longitude()));
+        e.setCapacidade(s.getCapacidade());
+        e.setFunciona24h(s.isFunciona24h());
+        e.setStatusAprovacao(s.getStatusAprovacao());
+        e.setDataCadastro(s.getDataCadastro());
     }
 }

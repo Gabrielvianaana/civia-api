@@ -20,7 +20,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.net.URI;
 import java.util.List;
 
-/** Recurso /api/v1/servicos: cadastro de servicos parceiros (abrigo, refeicao, banho, atendimento). */
+/** Recurso /api/v1/servicos (T_SERVICO e T_SERVICO_PERFIL). */
 @RestController
 @RequestMapping("/api/v1/servicos")
 @RequiredArgsConstructor
@@ -29,9 +29,10 @@ public class ServicoController {
     private final ServicoBO servicoBO;
 
     @GetMapping
-    public ResponseEntity<List<ServicoResponse>> listar(@RequestParam(required = false) String tipo,
-                                                        @RequestParam(required = false) Boolean aprovado) {
-        return ResponseEntity.ok(servicoBO.listar(tipo, aprovado));
+    public ResponseEntity<List<ServicoResponse>> listar(@RequestParam(required = false) Integer tipoServicoId,
+                                                        @RequestParam(required = false) String statusAprovacao,
+                                                        @RequestParam(required = false) Long organizacaoId) {
+        return ResponseEntity.ok(servicoBO.listar(tipoServicoId, statusAprovacao, organizacaoId));
     }
 
     @GetMapping("/{id}")
@@ -42,14 +43,12 @@ public class ServicoController {
     @PostMapping
     public ResponseEntity<ServicoResponse> cadastrar(@Valid @RequestBody ServicoRequest request) {
         ServicoResponse criado = servicoBO.cadastrar(request);
-        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
-                .path("/{id}").buildAndExpand(criado.id()).toUri();
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(criado.id()).toUri();
         return ResponseEntity.created(location).body(criado);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ServicoResponse> atualizar(@PathVariable Long id,
-                                                     @Valid @RequestBody ServicoRequest request) {
+    public ResponseEntity<ServicoResponse> atualizar(@PathVariable Long id, @Valid @RequestBody ServicoRequest request) {
         return ResponseEntity.ok(servicoBO.atualizar(id, request));
     }
 

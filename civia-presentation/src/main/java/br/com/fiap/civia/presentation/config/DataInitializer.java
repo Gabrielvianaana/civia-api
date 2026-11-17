@@ -7,8 +7,8 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 /**
- * Dispara a carga de dados de demonstracao na subida da aplicacao (somente com as tabelas vazias).
- * Pode ser desligada com civia.carga-inicial.habilitada=false.
+ * Na subida da aplicacao, garante as tabelas de dominio (tipos de servico e perfis) quando vazias.
+ * Pode ser desligado com civia.carga-inicial.habilitada=false.
  */
 @Component
 @RequiredArgsConstructor

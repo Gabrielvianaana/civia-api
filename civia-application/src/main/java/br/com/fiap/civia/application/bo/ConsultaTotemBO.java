@@ -1,142 +1,144 @@
 package br.com.fiap.civia.application.bo;
 
+import br.com.fiap.civia.application.dto.ConsultaTotemRequest;
 import br.com.fiap.civia.application.dto.ConsultaTotemResponse;
-import br.com.fiap.civia.application.dto.ServicoProximoResponse;
 import br.com.fiap.civia.application.exception.RecursoNaoEncontradoException;
-import br.com.fiap.civia.application.mapper.Conversor;
-import br.com.fiap.civia.domain.dao.AtualizacaoDisponibilidadeDAO;
+import br.com.fiap.civia.application.exception.RegraNegocioException;
+import br.com.fiap.civia.application.mapper.DtoMapper;
+import br.com.fiap.civia.domain.dao.ConsultaTotemDAO;
+import br.com.fiap.civia.domain.dao.PerfilAtendidoDAO;
 import br.com.fiap.civia.domain.dao.ServicoDAO;
+import br.com.fiap.civia.domain.dao.TipoServicoDAO;
 import br.com.fiap.civia.domain.dao.TotemDAO;
-import br.com.fiap.civia.domain.model.AtualizacaoDisponibilidade;
-import br.com.fiap.civia.domain.model.PerfilAtendido;
+import br.com.fiap.civia.domain.model.ConsultaTotem;
 import br.com.fiap.civia.domain.model.Servico;
-import br.com.fiap.civia.domain.model.TipoServico;
 import br.com.fiap.civia.domain.model.Totem;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.SecureRandom;
 import java.time.Clock;
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.Locale;
+import java.util.Objects;
+import java.util.random.RandomGenerator;
 
 import static br.com.fiap.civia.application.exception.TradutorExcecaoDominio.executar;
 
 /**
- * BO da consulta feita no totem: GET /totens/{id}/servicos?tipo=&perfil= (RF02, RF03, RF04, US02).
- * <ul>
- *   <li><b>RN06</b> - somente servicos aprovados pelo gestor aparecem.</li>
- *   <li>O filtro de perfil se aplica apenas a abrigos (US04).</li>
- *   <li>Ordenacao: disponiveis primeiro, depois lotados/fechados, por ultimo sem atualizacao recente (RN05);
- *       dentro de cada grupo, do mais proximo ao mais distante.</li>
- *   <li>Retorna no maximo 3 servicos.</li>
- * </ul>
+ * BO das consultas registradas nos totens (T_CONSULTA_TOTEM), base dos indicadores de uso (US15)
+ * e do registro de chegada pelo codigo impresso (RF12 / US14). Nenhum dado pessoal e armazenado (RNF07).
  */
 @Service
 @RequiredArgsConstructor
 public class ConsultaTotemBO {
 
-    public static final int LIMITE_RESULTADOS = 3;
-    /** Velocidade media de caminhada: 4,8 km/h = 80 metros por minuto. */
-    public static final double METROS_POR_MINUTO = 80d;
+    /** Sem caracteres ambiguos (0/O, 1/I) para facilitar a digitacao do codigo impresso. */
+    private static final String ALFABETO_CODIGO = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    private static final int MAX_TENTATIVAS_CODIGO = 20;
 
-    static final String ORIENTACAO_ABRIGO =
-            "A entrada no abrigo e feita por encaminhamento: procure o Centro POP mais proximo ou ligue 156.";
-    static final String ORIENTACAO_SEM_RESULTADO =
-            "Nenhum servico encontrado agora. Procure o Centro POP mais proximo ou ligue 156.";
-
+    private final ConsultaTotemDAO consultaDAO;
     private final TotemDAO totemDAO;
+    private final TipoServicoDAO tipoDAO;
+    private final PerfilAtendidoDAO perfilDAO;
     private final ServicoDAO servicoDAO;
-    private final AtualizacaoDisponibilidadeDAO atualizacaoDAO;
-    private final DisponibilidadeBO disponibilidadeBO;
     private final Clock clock;
+    private final RandomGenerator random = new SecureRandom();
 
     @Transactional(readOnly = true)
-    public ConsultaTotemResponse consultar(Long totemId, String tipo, String perfil) {
-        Totem totem = totemDAO.buscarPorId(totemId)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Totem " + totemId + " nao encontrado."));
-        executar(totem::garantirAtivo);
-
-        TipoServico tipoFiltro = Conversor.paraEnum(TipoServico.class, tipo, "tipo");
-        PerfilAtendido perfilFiltro = Conversor.paraEnum(PerfilAtendido.class, perfil, "perfil");
-        LocalDateTime agora = LocalDateTime.now(clock);
-
-        // RN06: apenas servicos aprovados. Filtro de perfil: somente para abrigos.
-        List<Servico> candidatos = servicoDAO.listar(tipoFiltro, Boolean.TRUE).stream()
-                .filter(Servico::isAprovado)
-                .filter(s -> perfilFiltro == null || !s.ehAbrigo() || s.atendePerfil(perfilFiltro))
-                .toList();
-
-        Map<Long, AtualizacaoDisponibilidade> ultimas =
-                atualizacaoDAO.buscarMaisRecentesPorServicos(candidatos.stream().map(Servico::getId).toList());
-
-        List<ServicoProximoResponse> resultado = candidatos.stream()
-                .map(s -> avaliar(s, totem, Optional.ofNullable(ultimas.get(s.getId())), agora))
-                .sorted(Comparator.comparingInt((Avaliado a) -> a.disponibilidade().status().getGrupoOrdenacao())
-                        .thenComparingDouble(Avaliado::distanciaMetros))
-                .limit(LIMITE_RESULTADOS)
-                .map(a -> paraResponse(a, agora))
-                .toList();
-
-        return new ConsultaTotemResponse(
-                totem.getId(),
-                totem.getIdentificacao(),
-                totem.getLocal(),
-                tipoFiltro == null ? null : tipoFiltro.name(),
-                perfilFiltro == null ? null : perfilFiltro.name(),
-                agora.truncatedTo(ChronoUnit.SECONDS),
-                resultado,
-                orientacao(tipoFiltro, resultado));
+    public List<ConsultaTotemResponse> listar(Long totemId) {
+        return consultaDAO.listar(totemId).stream().map(DtoMapper::paraResponse).toList();
     }
 
-    private Avaliado avaliar(Servico servico, Totem totem, Optional<AtualizacaoDisponibilidade> ultima,
-                             LocalDateTime agora) {
-        double distancia = totem.getCoordenada().distanciaEmMetrosAte(servico.getCoordenada());
-        return new Avaliado(servico, disponibilidadeBO.calcular(servico, ultima, agora), distancia);
+    @Transactional(readOnly = true)
+    public ConsultaTotemResponse buscar(Long id) {
+        return DtoMapper.paraResponse(obter(id));
     }
 
-    private static ServicoProximoResponse paraResponse(Avaliado avaliado, LocalDateTime agora) {
-        Servico s = avaliado.servico();
-        Disponibilidade d = avaliado.disponibilidade();
-        Long minutosDesde = d.dataReferencia() == null ? null
-                : Math.max(0, Duration.between(d.dataReferencia(), agora).toMinutes());
-        return new ServicoProximoResponse(
-                s.getId(),
-                s.getNome(),
-                s.getTipo().name(),
-                s.getEndereco(),
-                s.getCoordenada().latitude(),
-                s.getCoordenada().longitude(),
-                Conversor.deHora(s.getHorario().abertura()),
-                Conversor.deHora(s.getHorario().fechamento()),
-                Math.round(avaliado.distanciaMetros()),
-                minutosCaminhada(avaliado.distanciaMetros()),
-                d.status().name(),
-                d.mensagem(),
-                d.origem().name(),
-                d.dataReferencia(),
-                minutosDesde);
+    @Transactional
+    public ConsultaTotemResponse registrar(ConsultaTotemRequest r) {
+        Totem totem = totemDAO.buscarPorId(r.totemId())
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Totem " + r.totemId() + " nao encontrado."));
+        executar(totem::garantirDisponivelParaConsulta);
+        validarReferencias(r);
+        boolean imprimiu = Boolean.TRUE.equals(r.imprimiuRota());
+        ConsultaTotem c = executar(() -> ConsultaTotem.registrar(r.totemId(), r.tipoServicoId(), r.perfilId(),
+                r.servicoEscolhidoId(), agora(), imprimiu, Boolean.TRUE.equals(r.pediuAbordagem()),
+                imprimiu ? gerarCodigoUnico() : null));
+        return DtoMapper.paraResponse(consultaDAO.salvar(c));
     }
 
-    /** Estimativa a pe pela distancia em linha reta (minimo de 1 minuto). */
-    static long minutosCaminhada(double distanciaMetros) {
-        return Math.max(1, (long) Math.ceil(distanciaMetros / METROS_POR_MINUTO));
-    }
-
-    private static String orientacao(TipoServico tipo, List<ServicoProximoResponse> resultado) {
-        if (resultado.isEmpty()) {
-            return ORIENTACAO_SEM_RESULTADO;
+    @Transactional
+    public ConsultaTotemResponse atualizar(Long id, ConsultaTotemRequest r) {
+        ConsultaTotem c = obter(id);
+        if (!totemDAO.buscarPorId(r.totemId()).isPresent()) {
+            throw new RecursoNaoEncontradoException("Totem " + r.totemId() + " nao encontrado.");
         }
-        boolean temAbrigo = tipo == TipoServico.ABRIGO
-                || resultado.stream().anyMatch(r -> TipoServico.ABRIGO.name().equals(r.tipo()));
-        return temAbrigo ? ORIENTACAO_ABRIGO : null;
+        validarReferencias(r);
+        boolean imprimiu = Boolean.TRUE.equals(r.imprimiuRota());
+        String codigoNovo = imprimiu && c.getCodigoChegada() == null ? gerarCodigoUnico() : null;
+        executar(() -> c.atualizar(r.totemId(), r.tipoServicoId(), r.perfilId(), r.servicoEscolhidoId(), imprimiu,
+                Boolean.TRUE.equals(r.pediuAbordagem()), codigoNovo));
+        return DtoMapper.paraResponse(consultaDAO.salvar(c));
     }
 
-    private record Avaliado(Servico servico, Disponibilidade disponibilidade, double distanciaMetros) {
+    /** US14: o servico digita o codigo do papel e a chegada e registrada. */
+    @Transactional
+    public ConsultaTotemResponse registrarChegada(String codigo) {
+        String normalizado = codigo == null ? "" : codigo.trim().toUpperCase(Locale.ROOT);
+        ConsultaTotem c = consultaDAO.buscarPorCodigoChegada(normalizado)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Codigo de chegada " + normalizado + " nao encontrado."));
+        executar(() -> c.registrarChegada(agora()));
+        return DtoMapper.paraResponse(consultaDAO.salvar(c));
+    }
+
+    @Transactional
+    public void excluir(Long id) {
+        obter(id);
+        consultaDAO.excluir(id);
+    }
+
+    private void validarReferencias(ConsultaTotemRequest r) {
+        if (tipoDAO.buscarPorId(r.tipoServicoId()).isEmpty()) {
+            throw new RecursoNaoEncontradoException("Tipo de servico " + r.tipoServicoId() + " nao encontrado.");
+        }
+        if (r.perfilId() != null && perfilDAO.buscarPorId(r.perfilId()).isEmpty()) {
+            throw new RecursoNaoEncontradoException("Perfil " + r.perfilId() + " nao encontrado.");
+        }
+        if (r.servicoEscolhidoId() != null) {
+            Servico s = servicoDAO.buscarPorId(r.servicoEscolhidoId())
+                    .orElseThrow(() -> new RecursoNaoEncontradoException("Servico " + r.servicoEscolhidoId() + " nao encontrado."));
+            if (!s.estaAprovado()) {
+                throw new RegraNegocioException("O servico " + s.getId() + " nao esta aprovado e nao aparece nos totens (RN06).");
+            }
+            if (!Objects.equals(s.getTipo().getId(), r.tipoServicoId())) {
+                throw new RegraNegocioException("O servico escolhido nao e do tipo consultado.");
+            }
+        }
+    }
+
+    private String gerarCodigoUnico() {
+        for (int i = 0; i < MAX_TENTATIVAS_CODIGO; i++) {
+            StringBuilder sb = new StringBuilder(ConsultaTotem.TAMANHO_CODIGO);
+            for (int j = 0; j < ConsultaTotem.TAMANHO_CODIGO; j++) {
+                sb.append(ALFABETO_CODIGO.charAt(random.nextInt(ALFABETO_CODIGO.length())));
+            }
+            String codigo = sb.toString();
+            if (!consultaDAO.existePorCodigoChegada(codigo)) {
+                return codigo;
+            }
+        }
+        throw new IllegalStateException("Nao foi possivel gerar um codigo de chegada unico.");
+    }
+
+    private LocalDateTime agora() {
+        return LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
+    }
+
+    private ConsultaTotem obter(Long id) {
+        return consultaDAO.buscarPorId(id).orElseThrow(() -> new RecursoNaoEncontradoException("Consulta " + id + " nao encontrada."));
     }
 }

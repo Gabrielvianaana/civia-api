@@ -6,9 +6,7 @@ import jakarta.persistence.Converter;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
-/**
- * O Oracle nao possui tipo TIME: os horarios sao gravados como VARCHAR2(5) no formato "HH:mm".
- */
+/** O Oracle nao possui tipo TIME: horarios sao gravados em VARCHAR2(5) no formato "HH:MM". */
 @Converter
 public class HoraConverter implements AttributeConverter<LocalTime, String> {
 
@@ -21,6 +19,6 @@ public class HoraConverter implements AttributeConverter<LocalTime, String> {
 
     @Override
     public LocalTime convertToEntityAttribute(String valor) {
-        return valor == null ? null : LocalTime.parse(valor, FORMATO);
+        return valor == null ? null : LocalTime.parse(valor.trim(), FORMATO);
     }
 }

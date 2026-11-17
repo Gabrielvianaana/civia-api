@@ -3,18 +3,20 @@ package br.com.fiap.civia.application.dto;
 import java.time.LocalDateTime;
 import java.util.List;
 
-/** Representacao de saida do recurso servico. */
 public record ServicoResponse(
         Long id,
+        Long organizacaoId,
+        TipoServicoResponse tipoServico,
         String nome,
-        String tipo,
-        String endereco,
+        String logradouro,
+        String numero,
+        String bairro,
         double latitude,
         double longitude,
-        String horaAbertura,
-        String horaFechamento,
-        List<String> perfis,
-        boolean aprovado,
-        LocalDateTime dataCadastro
+        Integer capacidade,
+        boolean funciona24h,
+        String statusAprovacao,
+        LocalDateTime dataCadastro,
+        List<PerfilAtendidoResponse> perfis
 ) {
 }

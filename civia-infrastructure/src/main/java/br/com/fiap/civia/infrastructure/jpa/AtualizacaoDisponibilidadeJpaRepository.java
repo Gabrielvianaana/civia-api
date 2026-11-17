@@ -8,7 +8,6 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 
 public interface AtualizacaoDisponibilidadeJpaRepository extends JpaRepository<AtualizacaoDisponibilidadeEntity, Long> {
 
@@ -16,9 +15,7 @@ public interface AtualizacaoDisponibilidadeJpaRepository extends JpaRepository<A
 
     List<AtualizacaoDisponibilidadeEntity> findByServicoIdOrderByDataHoraDescIdDesc(Long servicoId);
 
-    Optional<AtualizacaoDisponibilidadeEntity> findFirstByServicoIdOrderByDataHoraDescIdDesc(Long servicoId);
-
-    /** Somente a atualizacao mais recente de cada servico informado. */
+    /** Somente a(s) atualizacao(oes) mais recente(s) de cada servico informado. */
     @Query("""
             select a from AtualizacaoDisponibilidadeEntity a
              where a.servicoId in :servicoIds
@@ -26,6 +23,8 @@ public interface AtualizacaoDisponibilidadeJpaRepository extends JpaRepository<A
                                   where b.servicoId = a.servicoId)
             """)
     List<AtualizacaoDisponibilidadeEntity> findMaisRecentesPorServicos(@Param("servicoIds") Collection<Long> servicoIds);
+
+    boolean existsByUsuarioId(Long usuarioId);
 
     @Modifying
     @Query("delete from AtualizacaoDisponibilidadeEntity a where a.servicoId = :servicoId")

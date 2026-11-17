@@ -5,7 +5,7 @@ import br.com.fiap.civia.domain.model.Totem;
 import java.util.List;
 import java.util.Optional;
 
-/** DAO de totens. */
+/** DAO de T_TOTEM. */
 public interface TotemDAO {
 
     Totem salvar(Totem totem);
@@ -14,12 +14,8 @@ public interface TotemDAO {
 
     List<Totem> listar();
 
-    boolean existePorIdentificacao(String identificacao);
-
-    /** Verifica duplicidade de identificacao ignorando o proprio totem (usado na atualizacao). */
-    boolean existePorIdentificacaoEmOutroTotem(String identificacao, Long idTotem);
-
-    long contar();
+    /** Codigo unico (un_totem_codigo). */
+    boolean existePorCodigo(String codigo, Long idIgnorado);
 
     void excluir(Long id);
 }

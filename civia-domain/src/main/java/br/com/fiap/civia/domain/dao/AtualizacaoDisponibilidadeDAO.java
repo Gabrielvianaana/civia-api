@@ -7,20 +7,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-/** DAO das atualizacoes de disponibilidade. */
+/** DAO de T_ATUALIZACAO. */
 public interface AtualizacaoDisponibilidadeDAO {
 
     AtualizacaoDisponibilidade salvar(AtualizacaoDisponibilidade atualizacao);
 
     Optional<AtualizacaoDisponibilidade> buscarPorId(Long id);
 
-    /** Lista da mais recente para a mais antiga; {@code servicoId} nulo lista todas. */
+    /** Da mais recente para a mais antiga; {@code servicoId} nulo lista todas. */
     List<AtualizacaoDisponibilidade> listar(Long servicoId);
 
-    Optional<AtualizacaoDisponibilidade> buscarMaisRecentePorServico(Long servicoId);
-
-    /** Mapa servicoId -> atualizacao mais recente, para os servicos informados. */
+    /** Mapa servicoId -> atualizacao mais recente. */
     Map<Long, AtualizacaoDisponibilidade> buscarMaisRecentesPorServicos(Collection<Long> servicoIds);
+
+    boolean existePorUsuario(Long usuarioId);
 
     void excluir(Long id);
 

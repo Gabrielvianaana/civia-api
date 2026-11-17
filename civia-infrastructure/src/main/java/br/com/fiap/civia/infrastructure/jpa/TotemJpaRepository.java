@@ -9,7 +9,7 @@ public interface TotemJpaRepository extends JpaRepository<TotemEntity, Long> {
 
     List<TotemEntity> findAllByOrderByIdAsc();
 
-    boolean existsByIdentificacaoIgnoreCase(String identificacao);
+    boolean existsByCodigoIgnoreCase(String codigo);
 
-    boolean existsByIdentificacaoIgnoreCaseAndIdNot(String identificacao, Long id);
+    boolean existsByCodigoIgnoreCaseAndIdNot(String codigo, Long id);
 }

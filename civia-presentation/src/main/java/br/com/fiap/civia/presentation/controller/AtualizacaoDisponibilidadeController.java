@@ -20,43 +20,39 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.net.URI;
 import java.util.List;
 
-/** Recurso /api/v1/atualizacoes: registro da disponibilidade dos servicos pelas equipes (painel). */
+/** Recurso /api/v1/atualizacoes (T_ATUALIZACAO): disponibilidade informada pelo painel ou pela Central de Vagas. */
 @RestController
 @RequestMapping("/api/v1/atualizacoes")
 @RequiredArgsConstructor
 public class AtualizacaoDisponibilidadeController {
 
-    private final AtualizacaoDisponibilidadeBO atualizacaoBO;
+    private final AtualizacaoDisponibilidadeBO atualizacaoDisponibilidadeBO;
 
     @GetMapping
-    public ResponseEntity<List<AtualizacaoDisponibilidadeResponse>> listar(
-            @RequestParam(required = false) Long servicoId) {
-        return ResponseEntity.ok(atualizacaoBO.listar(servicoId));
+    public ResponseEntity<List<AtualizacaoDisponibilidadeResponse>> listar(@RequestParam(required = false) Long servicoId) {
+        return ResponseEntity.ok(atualizacaoDisponibilidadeBO.listar(servicoId));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<AtualizacaoDisponibilidadeResponse> buscar(@PathVariable Long id) {
-        return ResponseEntity.ok(atualizacaoBO.buscar(id));
+        return ResponseEntity.ok(atualizacaoDisponibilidadeBO.buscar(id));
     }
 
     @PostMapping
-    public ResponseEntity<AtualizacaoDisponibilidadeResponse> registrar(
-            @Valid @RequestBody AtualizacaoDisponibilidadeRequest request) {
-        AtualizacaoDisponibilidadeResponse criada = atualizacaoBO.registrar(request);
-        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
-                .path("/{id}").buildAndExpand(criada.id()).toUri();
-        return ResponseEntity.created(location).body(criada);
+    public ResponseEntity<AtualizacaoDisponibilidadeResponse> cadastrar(@Valid @RequestBody AtualizacaoDisponibilidadeRequest request) {
+        AtualizacaoDisponibilidadeResponse criado = atualizacaoDisponibilidadeBO.registrar(request);
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(criado.id()).toUri();
+        return ResponseEntity.created(location).body(criado);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<AtualizacaoDisponibilidadeResponse> corrigir(
-            @PathVariable Long id, @Valid @RequestBody AtualizacaoDisponibilidadeRequest request) {
-        return ResponseEntity.ok(atualizacaoBO.corrigir(id, request));
+    public ResponseEntity<AtualizacaoDisponibilidadeResponse> atualizar(@PathVariable Long id, @Valid @RequestBody AtualizacaoDisponibilidadeRequest request) {
+        return ResponseEntity.ok(atualizacaoDisponibilidadeBO.corrigir(id, request));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> excluir(@PathVariable Long id) {
-        atualizacaoBO.excluir(id);
+        atualizacaoDisponibilidadeBO.excluir(id);
         return ResponseEntity.noContent().build();
     }
 }

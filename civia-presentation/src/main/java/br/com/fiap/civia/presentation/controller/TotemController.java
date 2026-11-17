@@ -1,8 +1,8 @@
 package br.com.fiap.civia.presentation.controller;
 
-import br.com.fiap.civia.application.bo.ConsultaTotemBO;
+import br.com.fiap.civia.application.bo.MapaServicosBO;
 import br.com.fiap.civia.application.bo.TotemBO;
-import br.com.fiap.civia.application.dto.ConsultaTotemResponse;
+import br.com.fiap.civia.application.dto.MapaServicosResponse;
 import br.com.fiap.civia.application.dto.TotemRequest;
 import br.com.fiap.civia.application.dto.TotemResponse;
 import jakarta.validation.Valid;
@@ -22,16 +22,25 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.net.URI;
 import java.util.List;
 
-/**
- * Recurso /api/v1/totens e o sub-recurso /servicos (consulta feita pelo totem).
- */
+/** Recurso /api/v1/totens (T_TOTEM) e a consulta do mapa de servicos. */
 @RestController
 @RequestMapping("/api/v1/totens")
 @RequiredArgsConstructor
 public class TotemController {
 
     private final TotemBO totemBO;
-    private final ConsultaTotemBO consultaTotemBO;
+    private final MapaServicosBO mapaServicosBO;
+
+    /**
+     * Consulta feita no totem: ate 3 servicos mais proximos, com o status de disponibilidade de cada um.
+     * {@code tipo} e {@code perfil} aceitam o id ou o nome (ex.: tipo=Abrigo&perfil=Mulher).
+     */
+    @GetMapping("/{id}/servicos")
+    public ResponseEntity<MapaServicosResponse> consultarServicos(@PathVariable Long id,
+                                                                  @RequestParam(required = false) String tipo,
+                                                                  @RequestParam(required = false) String perfil) {
+        return ResponseEntity.ok(mapaServicosBO.consultar(id, tipo, perfil));
+    }
 
     @GetMapping
     public ResponseEntity<List<TotemResponse>> listar() {
@@ -43,19 +52,10 @@ public class TotemController {
         return ResponseEntity.ok(totemBO.buscar(id));
     }
 
-    /** Ate 3 servicos mais proximos do totem, com o status de disponibilidade de cada um. */
-    @GetMapping("/{id}/servicos")
-    public ResponseEntity<ConsultaTotemResponse> consultarServicos(@PathVariable Long id,
-                                                                   @RequestParam(required = false) String tipo,
-                                                                   @RequestParam(required = false) String perfil) {
-        return ResponseEntity.ok(consultaTotemBO.consultar(id, tipo, perfil));
-    }
-
     @PostMapping
     public ResponseEntity<TotemResponse> cadastrar(@Valid @RequestBody TotemRequest request) {
         TotemResponse criado = totemBO.cadastrar(request);
-        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
-                .path("/{id}").buildAndExpand(criado.id()).toUri();
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(criado.id()).toUri();
         return ResponseEntity.created(location).body(criado);
     }
 

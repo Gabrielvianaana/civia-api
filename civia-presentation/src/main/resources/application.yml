@@ -35,7 +35,7 @@ spring:
 
 civia:
   carga-inicial:
-    # Carrega dados simulados de demonstracao quando as tabelas estao vazias
+    # Garante tipos de servico e perfis (tabelas de dominio) quando estao vazias
     habilitada: ${CIVIA_CARGA_INICIAL:true}
 
 management:

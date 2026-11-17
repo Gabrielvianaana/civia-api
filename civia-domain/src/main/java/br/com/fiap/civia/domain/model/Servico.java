@@ -3,109 +3,105 @@ package br.com.fiap.civia.domain.model;
 import br.com.fiap.civia.domain.exception.DadoInvalidoException;
 import br.com.fiap.civia.domain.exception.RegraNegocioVioladaException;
 import br.com.fiap.civia.domain.valueobject.Coordenada;
-import br.com.fiap.civia.domain.valueobject.HorarioFuncionamento;
+import br.com.fiap.civia.domain.valueobject.Endereco;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
-import java.util.EnumSet;
+import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
 
 /**
- * Entidade de dominio Servico (abrigo, refeicao, banho ou atendimento) cadastrado por parceiros (RF10).
- * Classe Java pura, sem anotacoes de persistencia. Tabelas: T_CIVIA_SERVICO e T_CIVIA_SERVICO_PERFIL.
+ * Servico parceiro exibido nos totens (RF10). Tabelas T_SERVICO e T_SERVICO_PERFIL.
+ * A organizacao responsavel e referenciada pelo id (outro agregado).
  */
 @Getter
 @ToString
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Servico {
 
-    public static final int TAMANHO_MAXIMO_NOME = 100;
-    public static final int TAMANHO_MAXIMO_ENDERECO = 200;
+    public static final int CAPACIDADE_MAXIMA = 99_999;
 
     @EqualsAndHashCode.Include
     private final Long id;
-    private String nome;
+    private Long organizacaoId;
     private TipoServico tipo;
-    private String endereco;
+    private String nome;
+    private Endereco endereco;
     private Coordenada coordenada;
-    private HorarioFuncionamento horario;
-    private Set<PerfilAtendido> perfis;
-    private boolean aprovado;
+    private Integer capacidade;
+    private boolean funciona24h;
+    private StatusAprovacao statusAprovacao;
     private final LocalDateTime dataCadastro;
+    private Set<PerfilAtendido> perfis;
 
-    private Servico(Long id, String nome, TipoServico tipo, String endereco, Coordenada coordenada,
-                    HorarioFuncionamento horario, Set<PerfilAtendido> perfis, boolean aprovado,
-                    LocalDateTime dataCadastro) {
+    private Servico(Long id, Long organizacaoId, TipoServico tipo, String nome, Endereco endereco,
+                    Coordenada coordenada, Integer capacidade, boolean funciona24h, StatusAprovacao statusAprovacao,
+                    LocalDateTime dataCadastro, Set<PerfilAtendido> perfis) {
         this.id = id;
         this.dataCadastro = Objects.requireNonNull(dataCadastro, "dataCadastro e obrigatoria");
-        definirDados(nome, tipo, endereco, coordenada, horario, perfis, aprovado);
+        definir(organizacaoId, tipo, nome, endereco, coordenada, capacidade, funciona24h, statusAprovacao, perfis);
     }
 
-    /** Fabrica para um novo cadastro (ainda sem id; o banco gera a identidade). */
-    public static Servico novo(String nome, TipoServico tipo, String endereco, Coordenada coordenada,
-                               HorarioFuncionamento horario, Set<PerfilAtendido> perfis, boolean aprovado,
-                               LocalDateTime dataCadastro) {
-        return new Servico(null, nome, tipo, endereco, coordenada, horario, perfis, aprovado, dataCadastro);
+    /** Novo cadastro: sem status informado, nasce PENDENTE de aprovacao do gestor (RN06 / US13). */
+    public static Servico novo(Long organizacaoId, TipoServico tipo, String nome, Endereco endereco,
+                               Coordenada coordenada, Integer capacidade, boolean funciona24h,
+                               StatusAprovacao statusAprovacao, LocalDateTime dataCadastro, Set<PerfilAtendido> perfis) {
+        return new Servico(null, organizacaoId, tipo, nome, endereco, coordenada, capacidade, funciona24h,
+                statusAprovacao == null ? StatusAprovacao.PENDENTE : statusAprovacao, dataCadastro, perfis);
     }
 
-    /** Fabrica para reconstituir um servico ja persistido (usada pelos DAOs). */
-    public static Servico reconstituir(Long id, String nome, TipoServico tipo, String endereco, Coordenada coordenada,
-                                       HorarioFuncionamento horario, Set<PerfilAtendido> perfis, boolean aprovado,
-                                       LocalDateTime dataCadastro) {
-        return new Servico(Objects.requireNonNull(id, "id e obrigatorio"), nome, tipo, endereco, coordenada,
-                horario, perfis, aprovado, dataCadastro);
+    public static Servico reconstituir(Long id, Long organizacaoId, TipoServico tipo, String nome, Endereco endereco,
+                                       Coordenada coordenada, Integer capacidade, boolean funciona24h,
+                                       StatusAprovacao statusAprovacao, LocalDateTime dataCadastro,
+                                       Set<PerfilAtendido> perfis) {
+        return new Servico(Objects.requireNonNull(id), organizacaoId, tipo, nome, endereco, coordenada, capacidade,
+                funciona24h, statusAprovacao, dataCadastro, perfis);
     }
 
-    public void atualizar(String nome, TipoServico tipo, String endereco, Coordenada coordenada,
-                          HorarioFuncionamento horario, Set<PerfilAtendido> perfis, boolean aprovado) {
-        definirDados(nome, tipo, endereco, coordenada, horario, perfis, aprovado);
+    public void atualizar(Long organizacaoId, TipoServico tipo, String nome, Endereco endereco, Coordenada coordenada,
+                          Integer capacidade, boolean funciona24h, StatusAprovacao statusAprovacao,
+                          Set<PerfilAtendido> perfis) {
+        definir(organizacaoId, tipo, nome, endereco, coordenada, capacidade, funciona24h,
+                statusAprovacao == null ? this.statusAprovacao : statusAprovacao, perfis);
     }
 
     public boolean ehAbrigo() {
-        return tipo == TipoServico.ABRIGO;
+        return tipo.ehAbrigo();
+    }
+
+    public boolean estaAprovado() {
+        return statusAprovacao == StatusAprovacao.APROVADO;
     }
 
     public boolean atendePerfil(PerfilAtendido perfil) {
-        return perfis.contains(perfil);
+        return perfil != null && perfis.stream().anyMatch(p -> Objects.equals(p.getId(), perfil.getId()));
     }
 
     public Set<PerfilAtendido> getPerfis() {
         return Collections.unmodifiableSet(perfis);
     }
 
-    private void definirDados(String nome, TipoServico tipo, String endereco, Coordenada coordenada,
-                              HorarioFuncionamento horario, Set<PerfilAtendido> perfis, boolean aprovado) {
-        this.nome = textoObrigatorio(nome, "nome", TAMANHO_MAXIMO_NOME);
-        this.tipo = exigir(tipo, "O tipo do servico e obrigatorio (ABRIGO, REFEICAO, BANHO ou ATENDIMENTO).");
-        this.endereco = textoObrigatorio(endereco, "endereco", TAMANHO_MAXIMO_ENDERECO);
-        this.coordenada = exigir(coordenada, "A localizacao (latitude/longitude) e obrigatoria.");
-        this.horario = exigir(horario, "O horario de funcionamento e obrigatorio.");
-        this.perfis = (perfis == null || perfis.isEmpty()) ? EnumSet.noneOf(PerfilAtendido.class) : EnumSet.copyOf(perfis);
-        this.aprovado = aprovado;
+    private void definir(Long organizacaoId, TipoServico tipo, String nome, Endereco endereco, Coordenada coordenada,
+                         Integer capacidade, boolean funciona24h, StatusAprovacao statusAprovacao,
+                         Set<PerfilAtendido> perfis) {
+        this.organizacaoId = Validacoes.obrigatorio(organizacaoId, "A organizacao responsavel e obrigatoria.");
+        this.tipo = Validacoes.obrigatorio(tipo, "O tipo de servico e obrigatorio.");
+        this.nome = Validacoes.textoObrigatorio(nome, "nome", 120);
+        this.endereco = Validacoes.obrigatorio(endereco, "O endereco e obrigatorio.");
+        this.coordenada = Validacoes.obrigatorio(coordenada, "A localizacao (latitude/longitude) e obrigatoria.");
+        if (capacidade != null && (capacidade <= 0 || capacidade > CAPACIDADE_MAXIMA)) {
+            throw new DadoInvalidoException("A capacidade deve ser maior que zero (e no maximo " + CAPACIDADE_MAXIMA + ").");
+        }
+        this.capacidade = capacidade;
+        this.funciona24h = funciona24h;
+        this.statusAprovacao = Validacoes.obrigatorio(statusAprovacao, "O status de aprovacao e obrigatorio.");
+        this.perfis = perfis == null ? new LinkedHashSet<>() : new LinkedHashSet<>(perfis);
         if (ehAbrigo() && this.perfis.isEmpty()) {
             throw new RegraNegocioVioladaException("Um abrigo deve informar ao menos um perfil atendido.");
         }
-    }
-
-    private static String textoObrigatorio(String valor, String campo, int tamanhoMaximo) {
-        if (valor == null || valor.isBlank()) {
-            throw new DadoInvalidoException("O campo " + campo + " e obrigatorio.");
-        }
-        String limpo = valor.trim();
-        if (limpo.length() > tamanhoMaximo) {
-            throw new DadoInvalidoException("O campo " + campo + " deve ter no maximo " + tamanhoMaximo + " caracteres.");
-        }
-        return limpo;
-    }
-
-    private static <T> T exigir(T valor, String mensagem) {
-        if (valor == null) {
-            throw new DadoInvalidoException(mensagem);
-        }
-        return valor;
     }
 }

@@ -1,12 +1,9 @@
 package br.com.fiap.civia.infrastructure.entity;
 
-import br.com.fiap.civia.domain.model.PerfilAtendido;
-import br.com.fiap.civia.domain.model.TipoServico;
-import br.com.fiap.civia.infrastructure.converter.HoraConverter;
-import jakarta.persistence.CollectionTable;
+import br.com.fiap.civia.domain.model.StatusAprovacao;
+import br.com.fiap.civia.infrastructure.converter.SimNaoConverter;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
-import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -15,65 +12,79 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.type.NumericBooleanConverter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.HashSet;
 import java.util.Set;
 
-/** Mapeamento JPA da tabela T_CIVIA_SERVICO (e da tabela associativa T_CIVIA_SERVICO_PERFIL). */
+/**
+ * Mapeamento JPA de T_SERVICO e da associativa N:N T_SERVICO_PERFIL.
+ * A organizacao e referenciada pelo id (outro agregado); tipo e perfis sao dados de referencia.
+ */
 @Entity
-@Table(name = "T_CIVIA_SERVICO")
+@Table(name = "T_SERVICO")
 @Getter
 @Setter
 @NoArgsConstructor
 public class ServicoEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "ID_SERVICO")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sqServico")
+    @SequenceGenerator(name = "sqServico", sequenceName = "SQ_SERVICO", allocationSize = 1)
+    @Column(name = "id_servico")
     private Long id;
 
-    @Column(name = "NOME", nullable = false, length = 100)
+    @Column(name = "id_organizacao", nullable = false)
+    private Long organizacaoId;
+
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @JoinColumn(name = "id_tipo_servico", nullable = false)
+    private TipoServicoEntity tipo;
+
+    @Column(name = "nm_servico", nullable = false, length = 120)
     private String nome;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "TIPO", nullable = false, length = 20)
-    private TipoServico tipo;
+    @Column(name = "ds_logradouro", nullable = false, length = 120)
+    private String logradouro;
 
-    @Column(name = "ENDERECO", nullable = false, length = 200)
-    private String endereco;
+    @Column(name = "nr_endereco", length = 10)
+    private String numero;
 
-    @Column(name = "LATITUDE", nullable = false, precision = 9, scale = 6)
+    @Column(name = "nm_bairro", nullable = false, length = 60)
+    private String bairro;
+
+    @Column(name = "nr_latitude", nullable = false, precision = 9, scale = 6)
     private BigDecimal latitude;
 
-    @Column(name = "LONGITUDE", nullable = false, precision = 9, scale = 6)
+    @Column(name = "nr_longitude", nullable = false, precision = 9, scale = 6)
     private BigDecimal longitude;
 
-    @Convert(converter = HoraConverter.class)
-    @Column(name = "HORA_ABERTURA", nullable = false, length = 5)
-    private LocalTime horaAbertura;
+    @Column(name = "nr_capacidade")
+    private Integer capacidade;
 
-    @Convert(converter = HoraConverter.class)
-    @Column(name = "HORA_FECHAMENTO", nullable = false, length = 5)
-    private LocalTime horaFechamento;
+    @Convert(converter = SimNaoConverter.class)
+    @Column(name = "fl_24h", nullable = false, columnDefinition = "CHAR(1)")
+    private Boolean funciona24h;
 
-    @Convert(converter = NumericBooleanConverter.class)
-    @Column(name = "APROVADO", nullable = false)
-    private Boolean aprovado;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "st_aprovacao", nullable = false, length = 10)
+    private StatusAprovacao statusAprovacao;
 
-    @Column(name = "DATA_CADASTRO", nullable = false)
+    @Column(name = "dt_cadastro", nullable = false, columnDefinition = "DATE")
     private LocalDateTime dataCadastro;
 
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "T_CIVIA_SERVICO_PERFIL", joinColumns = @JoinColumn(name = "ID_SERVICO"))
-    @Enumerated(EnumType.STRING)
-    @Column(name = "PERFIL", nullable = false, length = 20)
-    private Set<PerfilAtendido> perfis = new HashSet<>();
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "T_SERVICO_PERFIL",
+            joinColumns = @JoinColumn(name = "id_servico"),
+            inverseJoinColumns = @JoinColumn(name = "id_perfil"))
+    private Set<PerfilAtendidoEntity> perfis = new HashSet<>();
 }
