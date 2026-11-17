@@ -1,0 +1,19 @@
+# Credenciais locais (NUNCA versionar)
+.env
+.env.*
+!.env.example
+
+# Maven / build
+target/
+*.log
+
+# IDEs
+.idea/
+*.iml
+.vscode/
+.classpath
+.project
+.settings/
+
+# macOS
+.DS_Store

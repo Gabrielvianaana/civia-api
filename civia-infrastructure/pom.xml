@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>br.com.fiap.civia</groupId>
+        <artifactId>civia-api</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>civia-infrastructure</artifactId>
+    <name>CIVIA - Infrastructure</name>
+    <description>Implementacoes DAO: entidades JPA mapeadas nas tabelas Oracle e acesso a dados.</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>br.com.fiap.civia</groupId>
+            <artifactId>civia-domain</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+        <!-- Driver JDBC do Oracle (servidor Oracle da FIAP) -->
+        <dependency>
+            <groupId>com.oracle.database.jdbc</groupId>
+            <artifactId>ojdbc11</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>enforce-fronteira-infrastructure</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <bannedDependencies>
+                                    <searchTransitive>true</searchTransitive>
+                                    <excludes>
+                                        <exclude>br.com.fiap.civia:civia-application</exclude>
+                                        <exclude>br.com.fiap.civia:civia-presentation</exclude>
+                                        <exclude>org.springframework.boot:spring-boot-starter-webmvc</exclude>
+                                        <exclude>org.springframework.boot:spring-boot-starter-web</exclude>
+                                    </excludes>
+                                    <message>[DDD] infrastructure so pode enxergar domain.</message>
+                                </bannedDependencies>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

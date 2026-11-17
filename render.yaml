@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: civia-api
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: DB_URL
+        value: jdbc:oracle:thin:@oracle.fiap.com.br:1521:ORCL
+      # Usuario e senha sao preenchidos no painel do Render (nunca no repositorio)
+      - key: DB_USER
+        sync: false
+      - key: DB_PASSWORD
+        sync: false

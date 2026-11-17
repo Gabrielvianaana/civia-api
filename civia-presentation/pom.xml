@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>br.com.fiap.civia</groupId>
+        <artifactId>civia-api</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>civia-presentation</artifactId>
+    <name>CIVIA - Presentation</name>
+    <description>Controllers REST (/api/v1), tratamento global de excecoes e bootstrap Spring Boot.</description>
+
+    <dependencies>
+        <!-- presentation enxerga SOMENTE application em tempo de compilacao -->
+        <dependency>
+            <groupId>br.com.fiap.civia</groupId>
+            <artifactId>civia-application</artifactId>
+        </dependency>
+        <!-- domain/infrastructure apenas em runtime (fora do classpath de compilacao) -->
+        <dependency>
+            <groupId>br.com.fiap.civia</groupId>
+            <artifactId>civia-infrastructure</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>br.com.fiap.civia</groupId>
+            <artifactId>civia-domain</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webmvc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+        <!-- /actuator/health: usado pelo Render como health check e para confirmar a conexao com o Oracle -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <finalName>civia-api</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>enforce-fronteira-presentation</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <bannedDependencies>
+                                    <searchTransitive>true</searchTransitive>
+                                    <excludes>
+                                        <exclude>br.com.fiap.civia:civia-domain:*:*:compile</exclude>
+                                        <exclude>br.com.fiap.civia:civia-infrastructure:*:*:compile</exclude>
+                                    </excludes>
+                                    <message>[DDD] presentation so pode enxergar application.</message>
+                                </bannedDependencies>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>
