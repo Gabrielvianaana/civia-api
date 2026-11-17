@@ -1,0 +1,106 @@
+@startuml
+title CIVIA - Entidades JPA (mapeamento das tabelas Oracle)
+' Gerado a partir do codigo-fonte Java (pasta civia-*/src/main/java).
+!pragma layout smetana
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam dpi 150
+hide empty members
+top to bottom direction
+class AtualizacaoDisponibilidadeEntity <<Entity>> {
+  -id : Long
+  -servicoId : Long
+  -usuarioId : Long
+  -status : StatusDisponibilidade
+  -vagas : Integer
+  -origem : OrigemAtualizacao
+  -dataHora : LocalDateTime
+}
+class ConsultaTotemEntity <<Entity>> {
+  -id : Long
+  -totemId : Long
+  -tipoServicoId : Integer
+  -perfilId : Integer
+  -servicoEscolhidoId : Long
+  -dataConsulta : LocalDateTime
+  -imprimiuRota : Boolean
+  -pediuAbordagem : Boolean
+  -codigoChegada : String
+  -dataChegada : LocalDateTime
+}
+class HorarioEntity <<Entity>> {
+  -id : Long
+  -servicoId : Long
+  -diaSemana : Integer
+  -abertura : LocalTime
+  -fechamento : LocalTime
+}
+class OrganizacaoEntity <<Entity>> {
+  -id : Long
+  -nome : String
+  -tipo : TipoOrganizacao
+  -telefone : String
+  -email : String
+}
+class PerfilAtendidoEntity <<Entity>> {
+  -id : Integer
+  -descricao : String
+}
+class ServicoEntity <<Entity>> {
+  -id : Long
+  -organizacaoId : Long
+  -tipo : TipoServicoEntity
+  -nome : String
+  -logradouro : String
+  -numero : String
+  -bairro : String
+  -latitude : BigDecimal
+  -longitude : BigDecimal
+  -capacidade : Integer
+  -funciona24h : Boolean
+  -statusAprovacao : StatusAprovacao
+  -dataCadastro : LocalDateTime
+  -perfis : Set<PerfilAtendidoEntity>
+}
+class TipoServicoEntity <<Entity>> {
+  -id : Integer
+  -nome : String
+  -icone : String
+}
+class TotemEntity <<Entity>> {
+  -id : Long
+  -codigo : String
+  -logradouro : String
+  -bairro : String
+  -latitude : BigDecimal
+  -longitude : BigDecimal
+  -status : StatusTotem
+  -papelImpressora : Boolean
+  -dataInstalacao : LocalDate
+  -ultimaSincronizacao : LocalDateTime
+}
+class UsuarioPainelEntity <<Entity>> {
+  -id : Long
+  -organizacaoId : Long
+  -nome : String
+  -email : String
+  -perfilAcesso : PerfilAcesso
+  -ativo : Boolean
+}
+class HoraConverter <<Converter>> {
+  +convertToDatabaseColumn(hora) : String
+  +convertToEntityAttribute(valor) : LocalTime
+}
+class SimNaoConverter <<Converter>> {
+  +convertToDatabaseColumn(valor) : String
+  +convertToEntityAttribute(valor) : Boolean
+}
+AtualizacaoDisponibilidadeEntity -[hidden]down- OrganizacaoEntity
+ConsultaTotemEntity -[hidden]down- PerfilAtendidoEntity
+HorarioEntity -[hidden]down- ServicoEntity
+OrganizacaoEntity -[hidden]down- TipoServicoEntity
+PerfilAtendidoEntity -[hidden]down- TotemEntity
+ServicoEntity -[hidden]down- UsuarioPainelEntity
+TipoServicoEntity -[hidden]down- HoraConverter
+TotemEntity -[hidden]down- SimNaoConverter
+@enduml

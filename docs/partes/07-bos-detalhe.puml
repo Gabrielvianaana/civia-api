@@ -1,0 +1,150 @@
+@startuml
+title CIVIA - BOs com metodos
+' Gerado a partir do codigo-fonte Java (pasta civia-*/src/main/java).
+!pragma layout smetana
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam dpi 150
+hide empty members
+top to bottom direction
+class AtualizacaoDisponibilidadeBO <<Service>> {
+  -atualizacaoDAO : AtualizacaoDisponibilidadeDAO
+  -servicoDAO : ServicoDAO
+  -usuarioDAO : UsuarioPainelDAO
+  -clock : Clock
+  +listar(servicoId) : List<AtualizacaoDisponibilidadeResponse>
+  +buscar(id) : AtualizacaoDisponibilidadeResponse
+  +registrar(r) : AtualizacaoDisponibilidadeResponse
+  +corrigir(id, r) : AtualizacaoDisponibilidadeResponse
+  +excluir(id) : void
+}
+class CargaInicialBO <<Service>> {
+  -tipoDAO : TipoServicoDAO
+  -perfilDAO : PerfilAtendidoDAO
+  +carregarSeNecessario() : void
+}
+class ConsultaTotemBO <<Service>> {
+  -consultaDAO : ConsultaTotemDAO
+  -totemDAO : TotemDAO
+  -tipoDAO : TipoServicoDAO
+  -perfilDAO : PerfilAtendidoDAO
+  -servicoDAO : ServicoDAO
+  -clock : Clock
+  -random : RandomGenerator
+  +listar(totemId) : List<ConsultaTotemResponse>
+  +buscar(id) : ConsultaTotemResponse
+  +registrar(r) : ConsultaTotemResponse
+  +atualizar(id, r) : ConsultaTotemResponse
+  +registrarChegada(codigo) : ConsultaTotemResponse
+  +excluir(id) : void
+}
+class DisponibilidadeBO <<Component>> {
+  +{static} VALIDADE_ATUALIZACAO : Duration
+  +{static} MINIMO_VAGAS_TEM_VAGA : int
+  +calcular(servico, grade, ultimaAtualizacao, agora) : Disponibilidade
+  +{static} faixaDeVagas(vagas) : StatusDisponibilidade
+}
+class HorarioBO <<Service>> {
+  -horarioDAO : HorarioDAO
+  -servicoDAO : ServicoDAO
+  +listar(servicoId) : List<HorarioResponse>
+  +buscar(servicoId, id) : HorarioResponse
+  +cadastrar(servicoId, r) : HorarioResponse
+  +atualizar(servicoId, id, r) : HorarioResponse
+  +excluir(servicoId, id) : void
+}
+class MapaServicosBO <<Service>> {
+  +{static} LIMITE_RESULTADOS : int
+  +{static} METROS_POR_MINUTO : double
+  -totemDAO : TotemDAO
+  -servicoDAO : ServicoDAO
+  -tipoDAO : TipoServicoDAO
+  -perfilDAO : PerfilAtendidoDAO
+  -horarioDAO : HorarioDAO
+  -atualizacaoDAO : AtualizacaoDisponibilidadeDAO
+  -disponibilidadeBO : DisponibilidadeBO
+  -clock : Clock
+  +consultar(totemId, tipo, perfil) : MapaServicosResponse
+}
+class OrganizacaoBO <<Service>> {
+  -organizacaoDAO : OrganizacaoDAO
+  -servicoDAO : ServicoDAO
+  -usuarioDAO : UsuarioPainelDAO
+  +listar(tipo) : List<OrganizacaoResponse>
+  +buscar(id) : OrganizacaoResponse
+  +cadastrar(r) : OrganizacaoResponse
+  +atualizar(id, r) : OrganizacaoResponse
+  +excluir(id) : void
+}
+class PerfilAtendidoBO <<Service>> {
+  -perfilDAO : PerfilAtendidoDAO
+  -servicoDAO : ServicoDAO
+  -consultaDAO : ConsultaTotemDAO
+  +listar() : List<PerfilAtendidoResponse>
+  +buscar(id) : PerfilAtendidoResponse
+  +cadastrar(r) : PerfilAtendidoResponse
+  +atualizar(id, r) : PerfilAtendidoResponse
+  +excluir(id) : void
+}
+class ServicoBO <<Service>> {
+  -servicoDAO : ServicoDAO
+  -organizacaoDAO : OrganizacaoDAO
+  -tipoDAO : TipoServicoDAO
+  -perfilDAO : PerfilAtendidoDAO
+  -horarioDAO : HorarioDAO
+  -atualizacaoDAO : AtualizacaoDisponibilidadeDAO
+  -consultaDAO : ConsultaTotemDAO
+  -clock : Clock
+  +listar(tipoServicoId, statusAprovacao, organizacaoId) : List<ServicoResponse>
+  +buscar(id) : ServicoResponse
+  +cadastrar(r) : ServicoResponse
+  +atualizar(id, r) : ServicoResponse
+  +excluir(id) : void
+}
+class TipoServicoBO <<Service>> {
+  -tipoDAO : TipoServicoDAO
+  -servicoDAO : ServicoDAO
+  -consultaDAO : ConsultaTotemDAO
+  +listar() : List<TipoServicoResponse>
+  +buscar(id) : TipoServicoResponse
+  +cadastrar(r) : TipoServicoResponse
+  +atualizar(id, r) : TipoServicoResponse
+  +excluir(id) : void
+}
+class TotemBO <<Service>> {
+  -totemDAO : TotemDAO
+  -consultaDAO : ConsultaTotemDAO
+  -clock : Clock
+  +listar() : List<TotemResponse>
+  +buscar(id) : TotemResponse
+  +cadastrar(r) : TotemResponse
+  +atualizar(id, r) : TotemResponse
+  +excluir(id) : void
+}
+class UsuarioPainelBO <<Service>> {
+  -usuarioDAO : UsuarioPainelDAO
+  -organizacaoDAO : OrganizacaoDAO
+  -atualizacaoDAO : AtualizacaoDisponibilidadeDAO
+  +listar(organizacaoId) : List<UsuarioPainelResponse>
+  +buscar(id) : UsuarioPainelResponse
+  +cadastrar(r) : UsuarioPainelResponse
+  +atualizar(id, r) : UsuarioPainelResponse
+  +excluir(id) : void
+}
+class Disponibilidade <<record>> {
+  -status : StatusDisponibilidade
+  -mensagem : String
+  -origem : Origem
+  -dataReferencia : LocalDateTime
+}
+AtualizacaoDisponibilidadeBO -[hidden]down- DisponibilidadeBO
+CargaInicialBO -[hidden]down- HorarioBO
+ConsultaTotemBO -[hidden]down- MapaServicosBO
+DisponibilidadeBO -[hidden]down- OrganizacaoBO
+HorarioBO -[hidden]down- PerfilAtendidoBO
+MapaServicosBO -[hidden]down- ServicoBO
+OrganizacaoBO -[hidden]down- TipoServicoBO
+PerfilAtendidoBO -[hidden]down- TotemBO
+ServicoBO -[hidden]down- UsuarioPainelBO
+TipoServicoBO -[hidden]down- Disponibilidade
+@enduml

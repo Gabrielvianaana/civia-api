@@ -1,0 +1,107 @@
+@startuml
+title CIVIA - Dominio: servico, tipo, perfil e horarios
+' Gerado a partir do codigo-fonte Java (pasta civia-*/src/main/java).
+!pragma layout smetana
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam dpi 150
+hide empty members
+top to bottom direction
+class Servico {
+  +{static} CAPACIDADE_MAXIMA : int
+  -id : Long
+  -organizacaoId : Long
+  -tipo : TipoServico
+  -nome : String
+  -endereco : Endereco
+  -coordenada : Coordenada
+  -capacidade : Integer
+  -funciona24h : boolean
+  -statusAprovacao : StatusAprovacao
+  -dataCadastro : LocalDateTime
+  -perfis : Set<PerfilAtendido>
+  +{static} novo(organizacaoId, tipo, nome, ...) : Servico
+  +{static} reconstituir(id, organizacaoId, tipo, ...) : Servico
+  +atualizar(organizacaoId, tipo, nome, ...) : void
+  +ehAbrigo() : boolean
+  +estaAprovado() : boolean
+  +atendePerfil(perfil) : boolean
+  +getPerfis() : Set<PerfilAtendido>
+}
+class TipoServico {
+  +{static} NOME_ABRIGO : String
+  -id : Integer
+  -nome : String
+  -icone : String
+  +{static} novo(nome, icone) : TipoServico
+  +{static} reconstituir(id, nome, icone) : TipoServico
+  +atualizar(nome, icone) : void
+  +ehAbrigo() : boolean
+  +temNome(outro) : boolean
+  +{static} normalizar(texto) : String
+}
+class PerfilAtendido {
+  -id : Integer
+  -descricao : String
+  +{static} novo(descricao) : PerfilAtendido
+  +{static} reconstituir(id, descricao) : PerfilAtendido
+  +atualizar(descricao) : void
+  +temDescricao(outra) : boolean
+}
+class Horario {
+  +{static} FIM_DO_DIA : LocalTime
+  -id : Long
+  -servicoId : Long
+  -diaSemana : int
+  -abertura : LocalTime
+  -fechamento : LocalTime
+  +{static} novo(servicoId, diaSemana, abertura, fechamento) : Horario
+  +{static} reconstituir(id, servicoId, diaSemana, ...) : Horario
+  +atualizar(diaSemana, abertura, fechamento) : void
+  +{static} diaSemanaDe(dia) : int
+  +{static} nomeDoDia(diaSemana) : String
+  +abrangeInstante(instante) : boolean
+}
+class GradeHorario <<record>> {
+  -funciona24h : boolean
+  -horarios : List<Horario>
+  +estaAbertoEm(instante) : boolean
+  +faixaAtual(instante) : Optional<Horario>
+  +proximaAberturaNoDia(instante) : Optional<Horario>
+}
+enum StatusAprovacao {
+  PENDENTE
+  APROVADO
+  REPROVADO
+}
+class Endereco <<record>> {
+  -logradouro : String
+  -numero : String
+  -bairro : String
+  +formatado() : String
+}
+class Coordenada <<record>> {
+  -latitude : double
+  -longitude : double
+  +{static} de(latitude, longitude) : Coordenada
+  +distanciaEmMetrosAte(destino) : double
+}
+class Validacoes {
+  +{static} textoObrigatorio(valor, campo, tamanhoMaximo) : String
+  +{static} textoOpcional(valor, campo, tamanhoMaximo) : String
+  +{static} emailOpcional(valor, campo) : String
+  +{static} obrigatorio(valor, mensagem) : T
+}
+GradeHorario --> "*" Horario
+Servico --> "*" PerfilAtendido
+Servico --> "1" Coordenada
+Servico --> "1" Endereco
+Servico --> "1" StatusAprovacao
+Servico --> "1" TipoServico
+Servico -[hidden]down- Horario
+TipoServico -[hidden]down- GradeHorario
+PerfilAtendido -[hidden]down- StatusAprovacao
+Horario -[hidden]down- Endereco
+GradeHorario -[hidden]down- Coordenada
+StatusAprovacao -[hidden]down- Validacoes
+@enduml

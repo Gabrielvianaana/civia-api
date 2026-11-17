@@ -1,0 +1,52 @@
+@startuml
+title CIVIA - Tratamento de excecoes
+' Gerado a partir do codigo-fonte Java (pasta civia-*/src/main/java).
+!pragma layout smetana
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam dpi 150
+hide empty members
+top to bottom direction
+abstract class DomainException {
+}
+class DadoInvalidoException {
+}
+class RegraNegocioVioladaException {
+}
+class TradutorExcecaoDominio {
+  +{static} executar(acao) : T
+  +{static} executar(acao) : void
+}
+class DadosInvalidosException {
+}
+class RegraNegocioException {
+}
+class RecursoNaoEncontradoException {
+}
+class ConflitoException {
+}
+class GlobalExceptionHandler <<RestControllerAdvice>> {
+  +tratarValidacao(ex, request) : ResponseEntity<ProblemDetail>
+  +tratarDadosInvalidos(ex, request) : ResponseEntity<ProblemDetail>
+  +tratarValidacaoParametros(ex, request) : ResponseEntity<ProblemDetail>
+  +tratarCorpoIlegivel(ex, request) : ResponseEntity<ProblemDetail>
+  +tratarTipoParametro(ex, request) : ResponseEntity<ProblemDetail>
+  +tratarParametroAusente(ex, request) : ResponseEntity<ProblemDetail>
+  +tratarNaoEncontrado(ex, request) : ResponseEntity<ProblemDetail>
+  +tratarConflito(ex, request) : ResponseEntity<ProblemDetail>
+  +tratarIntegridade(ex, request) : ResponseEntity<ProblemDetail>
+  +tratarRegraNegocio(ex, request) : ResponseEntity<ProblemDetail>
+  +tratarRotaInexistente(ex, request) : ResponseEntity<ProblemDetail>
+  +tratarMetodoNaoSuportado(ex, request) : ResponseEntity<ProblemDetail>
+  +tratarMidiaNaoSuportada(ex, request) : ResponseEntity<ProblemDetail>
+  +tratarErroInesperado(ex, request) : ResponseEntity<ProblemDetail>
+}
+DomainException <|-- DadoInvalidoException
+DomainException <|-- RegraNegocioVioladaException
+DomainException -[hidden]down- TradutorExcecaoDominio
+DadoInvalidoException -[hidden]down- DadosInvalidosException
+RegraNegocioVioladaException -[hidden]down- RegraNegocioException
+TradutorExcecaoDominio -[hidden]down- RecursoNaoEncontradoException
+DadosInvalidosException -[hidden]down- ConflitoException
+RegraNegocioException -[hidden]down- GlobalExceptionHandler
+@enduml

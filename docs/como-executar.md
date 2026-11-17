@@ -142,6 +142,7 @@ O `Dockerfile` compila o projeto com Maven + JDK 21 e executa o jar em uma image
 
 - Diagrama de classes: [`diagrama-classes.md`](diagrama-classes.md) (Mermaid, renderizado pelo GitHub) e
   arquivos `diagrama-classes-*.puml` (PlantUML). Gerados a partir do codigo por `docs/ferramentas/gerar_diagrama.py`.
+- Diagrama de classes em partes (uma pagina cada, para o PDF): pasta [`partes/`](partes/LEIA-ME.md).
 - DER: [`der.md`](der.md) (Mermaid) e `der.puml` (PlantUML), gerados a partir de `db/01_ddl.sql`
   por `docs/ferramentas/gerar_der.py`.
 

@@ -1,0 +1,64 @@
+@startuml
+title CIVIA - Dominio: totem e consultas
+' Gerado a partir do codigo-fonte Java (pasta civia-*/src/main/java).
+!pragma layout smetana
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam dpi 150
+hide empty members
+top to bottom direction
+class Totem {
+  -id : Long
+  -codigo : String
+  -endereco : Endereco
+  -coordenada : Coordenada
+  -status : StatusTotem
+  -papelImpressora : boolean
+  -dataInstalacao : LocalDate
+  -ultimaSincronizacao : LocalDateTime
+  +{static} novo(codigo, endereco, coordenada, ...) : Totem
+  +{static} reconstituir(id, codigo, endereco, ...) : Totem
+  +atualizar(codigo, endereco, coordenada, ...) : void
+  +garantirDisponivelParaConsulta() : void
+}
+class ConsultaTotem {
+  +{static} TAMANHO_CODIGO : int
+  -id : Long
+  -totemId : Long
+  -tipoServicoId : Integer
+  -perfilId : Integer
+  -servicoEscolhidoId : Long
+  -dataConsulta : LocalDateTime
+  -imprimiuRota : boolean
+  -pediuAbordagem : boolean
+  -codigoChegada : String
+  -dataChegada : LocalDateTime
+  +{static} registrar(totemId, tipoServicoId, perfilId, ...) : ConsultaTotem
+  +{static} reconstituir(id, totemId, tipoServicoId, ...) : ConsultaTotem
+  +atualizar(totemId, tipoServicoId, perfilId, ...) : void
+  +registrarChegada(instante) : void
+  +chegadaRegistrada() : boolean
+}
+enum StatusTotem {
+  ONLINE
+  OFFLINE
+  MANUTENCAO
+}
+class Endereco <<record>> {
+  -logradouro : String
+  -numero : String
+  -bairro : String
+  +formatado() : String
+}
+class Coordenada <<record>> {
+  -latitude : double
+  -longitude : double
+  +{static} de(latitude, longitude) : Coordenada
+  +distanciaEmMetrosAte(destino) : double
+}
+Totem --> "1" Coordenada
+Totem --> "1" Endereco
+Totem --> "1" StatusTotem
+Totem -[hidden]down- Endereco
+ConsultaTotem -[hidden]down- Coordenada
+@enduml

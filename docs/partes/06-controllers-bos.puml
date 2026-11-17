@@ -1,0 +1,86 @@
+@startuml
+title CIVIA - Controllers e BOs (regras de negocio)
+' Gerado a partir do codigo-fonte Java (pasta civia-*/src/main/java).
+!pragma layout smetana
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam dpi 150
+hide empty members
+top to bottom direction
+class AtualizacaoDisponibilidadeController <<RestController>> {
+}
+class AtualizacaoDisponibilidadeBO <<Service>> {
+}
+class ConsultaTotemController <<RestController>> {
+}
+class ConsultaTotemBO <<Service>> {
+}
+class HorarioController <<RestController>> {
+}
+class HorarioBO <<Service>> {
+}
+class OrganizacaoController <<RestController>> {
+}
+class OrganizacaoBO <<Service>> {
+}
+class PerfilAtendidoController <<RestController>> {
+}
+class PerfilAtendidoBO <<Service>> {
+}
+class ServicoController <<RestController>> {
+}
+class ServicoBO <<Service>> {
+}
+class TipoServicoController <<RestController>> {
+}
+class TipoServicoBO <<Service>> {
+}
+class TotemController <<RestController>> {
+}
+class TotemBO <<Service>> {
+}
+class UsuarioPainelController <<RestController>> {
+}
+class UsuarioPainelBO <<Service>> {
+}
+class MapaServicosBO <<Service>> {
+}
+class DisponibilidadeBO <<Component>> {
+}
+class DataInitializer <<Component>> {
+}
+class CargaInicialBO <<Service>> {
+}
+AtualizacaoDisponibilidadeController ..> AtualizacaoDisponibilidadeBO
+ConsultaTotemController ..> ConsultaTotemBO
+DataInitializer ..> CargaInicialBO
+HorarioController ..> HorarioBO
+MapaServicosBO ..> DisponibilidadeBO
+OrganizacaoController ..> OrganizacaoBO
+PerfilAtendidoController ..> PerfilAtendidoBO
+ServicoController ..> ServicoBO
+TipoServicoController ..> TipoServicoBO
+TotemController ..> MapaServicosBO
+TotemController ..> TotemBO
+UsuarioPainelController ..> UsuarioPainelBO
+AtualizacaoDisponibilidadeController -[hidden]down- ConsultaTotemController
+AtualizacaoDisponibilidadeBO -[hidden]down- ConsultaTotemBO
+ConsultaTotemController -[hidden]down- HorarioController
+ConsultaTotemBO -[hidden]down- HorarioBO
+HorarioController -[hidden]down- OrganizacaoController
+HorarioBO -[hidden]down- OrganizacaoBO
+OrganizacaoController -[hidden]down- PerfilAtendidoController
+OrganizacaoBO -[hidden]down- PerfilAtendidoBO
+PerfilAtendidoController -[hidden]down- ServicoController
+PerfilAtendidoBO -[hidden]down- ServicoBO
+ServicoController -[hidden]down- TipoServicoController
+ServicoBO -[hidden]down- TipoServicoBO
+TipoServicoController -[hidden]down- TotemController
+TipoServicoBO -[hidden]down- TotemBO
+TotemController -[hidden]down- UsuarioPainelController
+TotemBO -[hidden]down- UsuarioPainelBO
+UsuarioPainelController -[hidden]down- MapaServicosBO
+UsuarioPainelBO -[hidden]down- DisponibilidadeBO
+MapaServicosBO -[hidden]down- DataInitializer
+DisponibilidadeBO -[hidden]down- CargaInicialBO
+@enduml

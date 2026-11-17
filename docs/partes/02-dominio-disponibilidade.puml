@@ -1,0 +1,91 @@
+@startuml
+title CIVIA - Dominio: disponibilidade, usuarios e organizacoes
+' Gerado a partir do codigo-fonte Java (pasta civia-*/src/main/java).
+!pragma layout smetana
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam dpi 150
+hide empty members
+top to bottom direction
+class AtualizacaoDisponibilidade {
+  +{static} MAXIMO_VAGAS : int
+  -id : Long
+  -servicoId : Long
+  -usuarioId : Long
+  -status : StatusDisponibilidade
+  -vagas : Integer
+  -origem : OrigemAtualizacao
+  -dataHora : LocalDateTime
+  +{static} registrar(servico, usuarioId, status, ...) : AtualizacaoDisponibilidade
+  +{static} reconstituir(id, servicoId, usuarioId, ...) : AtualizacaoDisponibilidade
+  +corrigir(servico, usuarioId, status, ...) : void
+  +ehAnteriorA(instante) : boolean
+}
+enum StatusDisponibilidade {
+  TEM_VAGA
+  POUCAS_VAGAS
+  ABERTO
+  FILA_GRANDE
+  LOTADO
+  FECHADO
+  SEM_ATUALIZACAO_RECENTE
+  -grupoOrdenacao : int
+  -exigeVagas : boolean
+  +getGrupoOrdenacao() : int
+  +exigeVagas() : boolean
+  +{static} de(situacao) : StatusDisponibilidade
+}
+enum OrigemAtualizacao {
+  PAINEL
+  CENTRAL_VAGAS
+}
+enum SituacaoServico {
+  ABERTO
+  FILA_GRANDE
+  LOTADO
+  FECHADO
+}
+class UsuarioPainel {
+  -id : Long
+  -organizacaoId : Long
+  -nome : String
+  -email : String
+  -perfilAcesso : PerfilAcesso
+  -ativo : boolean
+  +{static} novo(organizacaoId, nome, email, ...) : UsuarioPainel
+  +{static} reconstituir(id, organizacaoId, nome, ...) : UsuarioPainel
+  +atualizar(organizacaoId, nome, email, ...) : void
+  +garantirPodeAtualizar(servico) : void
+}
+enum PerfilAcesso {
+  GESTOR
+  EQUIPE
+  COOPERATIVA
+}
+class Organizacao {
+  -id : Long
+  -nome : String
+  -tipo : TipoOrganizacao
+  -telefone : String
+  -email : String
+  +{static} nova(nome, tipo, telefone, email) : Organizacao
+  +{static} reconstituir(id, nome, tipo, ...) : Organizacao
+  +atualizar(nome, tipo, telefone, email) : void
+}
+enum TipoOrganizacao {
+  CENTRO_POP
+  ONG
+  COOPERATIVA
+  PREFEITURA
+  PARCEIRO
+}
+AtualizacaoDisponibilidade --> "1" OrigemAtualizacao
+AtualizacaoDisponibilidade --> "1" StatusDisponibilidade
+Organizacao --> "1" TipoOrganizacao
+UsuarioPainel --> "1" PerfilAcesso
+AtualizacaoDisponibilidade -[hidden]down- SituacaoServico
+StatusDisponibilidade -[hidden]down- UsuarioPainel
+OrigemAtualizacao -[hidden]down- PerfilAcesso
+SituacaoServico -[hidden]down- Organizacao
+UsuarioPainel -[hidden]down- TipoOrganizacao
+@enduml

@@ -147,7 +147,13 @@ def tipos_referenciados(t):
     return set(re.findall(r"\b([A-Z]\w+)\b", t))
 
 
-def bloco_classe(c, completo=True):
+def params_resumidos(ps, limite=4):
+    """Somente os nomes dos parametros; listas longas sao abreviadas (os tipos ja aparecem nos atributos)."""
+    nomes = [x.split(":")[0].strip() for x in ps.split(", ")] if ps else []
+    return ", ".join(nomes if len(nomes) <= limite else nomes[:limite - 1] + ["..."])
+
+
+def bloco_classe(c, completo=True, resumido=False):
     kw = {"class": "abstract class" if c["abstrata"] else "class", "interface": "interface", "enum": "enum",
           "record": "class"}[c["tipo"]]
     est = []
@@ -162,6 +168,7 @@ def bloco_classe(c, completo=True):
         for simb, n, t, est_ in c["campos"]:
             linhas.append(f"  {simb}{'{static} ' if est_ else ''}{n} : {t}")
         for simb, n, ps, ret, est_ in c["metodos"]:
+            ps = params_resumidos(ps) if resumido else ps
             linhas.append(f"  {simb}{'{static} ' if est_ else ''}{n}({ps}) : {ret}")
     linhas.append("}")
     return linhas
@@ -274,3 +281,54 @@ with open(os.path.join(DOCS, "diagrama-classes.md"), "w", encoding="utf-8") as f
                                or c["nome"].endswith("JpaRepository")) and c["nome"] != "CiviaApplication",
                     completo=False))
     f.write("\n")
+
+
+# ---------- Diagramas em partes (cada um cabe em uma pagina do PDF) ----------
+def parte(arquivo, titulo, nomes, completo=True, colunas=3, relacoes_extra=True):
+    nomes = [n for n in nomes if n in classes]
+    linhas = ["@startuml", f"title {titulo}", "' Gerado a partir do codigo-fonte Java (pasta civia-*/src/main/java).",
+              "!pragma layout smetana", "skinparam classAttributeIconSize 0", "skinparam shadowing false",
+              "skinparam dpi 150", "hide empty members", "top to bottom direction"]
+    for n in nomes:
+        linhas += bloco_classe(classes[n], completo, resumido=True)
+    rel = relacoes(set(nomes)) if relacoes_extra else []
+    linhas += rel
+    # grade invisivel: empilha as classes em colunas para a imagem nao virar uma faixa horizontal
+    for i in range(len(nomes) - colunas):
+        linhas.append(f"{nomes[i]} -[hidden]down- {nomes[i + colunas]}")
+    linhas.append("@enduml")
+    with open(os.path.join(DOCS, "partes", arquivo), "w", encoding="utf-8") as f:
+        f.write("\n".join(linhas) + "\n")
+
+
+os.makedirs(os.path.join(DOCS, "partes"), exist_ok=True)
+DAOS = [n for n, c in classes.items() if c["pacote"].endswith("domain.dao")]
+parte("01-dominio-servico.puml", "CIVIA - Dominio: servico, tipo, perfil e horarios",
+      ["Servico", "TipoServico", "PerfilAtendido", "Horario", "GradeHorario", "StatusAprovacao", "Endereco",
+       "Coordenada", "Validacoes"])
+parte("02-dominio-disponibilidade.puml", "CIVIA - Dominio: disponibilidade, usuarios e organizacoes",
+      ["AtualizacaoDisponibilidade", "StatusDisponibilidade", "OrigemAtualizacao", "SituacaoServico",
+       "UsuarioPainel", "PerfilAcesso", "Organizacao", "TipoOrganizacao"])
+parte("03-dominio-totem.puml", "CIVIA - Dominio: totem e consultas",
+      ["Totem", "ConsultaTotem", "StatusTotem", "Endereco", "Coordenada"])
+parte("04-dominio-dao.puml", "CIVIA - Interfaces DAO (dominio)", sorted(DAOS), colunas=3)
+TRIOS = [x for d in sorted(DAOS) for x in (d, d + "Impl", d.replace("DAO", "JpaRepository"))]
+parte("05-dao-implementacoes.puml", "CIVIA - DAO: interface (dominio) <- DAOImpl (infraestrutura) -> JpaRepository",
+      TRIOS, completo=False, colunas=3)
+PARES = []
+for ctrl in sorted(n for n in classes if n.endswith("Controller")):
+    bo = ctrl.replace("Controller", "BO")
+    PARES += [ctrl, bo]
+PARES += ["MapaServicosBO", "DisponibilidadeBO", "DataInitializer", "CargaInicialBO"]
+parte("06-controllers-bos.puml", "CIVIA - Controllers e BOs (regras de negocio)", PARES, completo=False, colunas=2)
+parte("07-bos-detalhe.puml", "CIVIA - BOs com metodos",
+      sorted(n for n in classes if n.endswith("BO")) + ["Disponibilidade"], colunas=3, relacoes_extra=False)
+parte("08-excecoes.puml", "CIVIA - Tratamento de excecoes",
+      ["DomainException", "DadoInvalidoException", "RegraNegocioVioladaException", "TradutorExcecaoDominio",
+       "DadosInvalidosException", "RegraNegocioException", "RecursoNaoEncontradoException", "ConflitoException",
+       "GlobalExceptionHandler"], colunas=3)
+parte("09-entidades-jpa.puml", "CIVIA - Entidades JPA (mapeamento das tabelas Oracle)",
+      sorted(n for n in classes if n.endswith("Entity")) + ["HoraConverter", "SimNaoConverter"], colunas=3)
+parte("10-dtos.puml", "CIVIA - DTOs (records de entrada e saida)",
+      sorted(n for n in classes if n.endswith(("Request", "Response"))), colunas=4)
+print("partes geradas em docs/partes")

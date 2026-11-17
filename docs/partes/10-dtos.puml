@@ -1,0 +1,201 @@
+@startuml
+title CIVIA - DTOs (records de entrada e saida)
+' Gerado a partir do codigo-fonte Java (pasta civia-*/src/main/java).
+!pragma layout smetana
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam dpi 150
+hide empty members
+top to bottom direction
+class AtualizacaoDisponibilidadeRequest <<record>> {
+  -servicoId : Long
+  -origem : String
+  -usuarioId : Long
+  -vagas : Integer
+  -situacao : String
+  -dataHora : LocalDateTime
+}
+class AtualizacaoDisponibilidadeResponse <<record>> {
+  -id : Long
+  -servicoId : Long
+  -usuarioId : Long
+  -status : String
+  -vagas : Integer
+  -origem : String
+  -dataHora : LocalDateTime
+}
+class ConsultaTotemRequest <<record>> {
+  -totemId : Long
+  -tipoServicoId : Integer
+  -perfilId : Integer
+  -servicoEscolhidoId : Long
+  -imprimiuRota : Boolean
+  -pediuAbordagem : Boolean
+}
+class ConsultaTotemResponse <<record>> {
+  -id : Long
+  -totemId : Long
+  -tipoServicoId : Integer
+  -perfilId : Integer
+  -servicoEscolhidoId : Long
+  -dataConsulta : LocalDateTime
+  -imprimiuRota : boolean
+  -pediuAbordagem : boolean
+  -codigoChegada : String
+  -dataChegada : LocalDateTime
+}
+class HorarioRequest <<record>> {
+  -diaSemana : Integer
+  -horaAbertura : String
+  -horaFechamento : String
+}
+class HorarioResponse <<record>> {
+  -id : Long
+  -servicoId : Long
+  -diaSemana : int
+  -nomeDia : String
+  -horaAbertura : String
+  -horaFechamento : String
+}
+class MapaServicosResponse <<record>> {
+  -totemId : Long
+  -codigoTotem : String
+  -tipoServicoFiltrado : String
+  -perfilFiltrado : String
+  -consultadoEm : LocalDateTime
+  -servicos : List<ServicoProximoResponse>
+  -orientacao : String
+}
+class OrganizacaoRequest <<record>> {
+  -nome : String
+  -tipo : String
+  -telefone : String
+  -email : String
+}
+class OrganizacaoResponse <<record>> {
+  -id : Long
+  -nome : String
+  -tipo : String
+  -telefone : String
+  -email : String
+}
+class PerfilAtendidoRequest <<record>> {
+  -descricao : String
+}
+class PerfilAtendidoResponse <<record>> {
+  -id : Integer
+  -descricao : String
+}
+class ServicoProximoResponse <<record>> {
+  -servicoId : Long
+  -nome : String
+  -tipoServico : String
+  -endereco : String
+  -latitude : double
+  -longitude : double
+  -distanciaMetros : long
+  -minutosCaminhada : long
+  -status : String
+  -mensagem : String
+  -origemInformacao : String
+  -ultimaAtualizacao : LocalDateTime
+  -minutosDesdeAtualizacao : Long
+}
+class ServicoRequest <<record>> {
+  -organizacaoId : Long
+  -tipoServicoId : Integer
+  -nome : String
+  -logradouro : String
+  -numero : String
+  -bairro : String
+  -latitude : Double
+  -longitude : Double
+  -capacidade : Integer
+  -funciona24h : Boolean
+  -statusAprovacao : String
+  -perfilIds : Set<Integer>
+}
+class ServicoResponse <<record>> {
+  -id : Long
+  -organizacaoId : Long
+  -tipoServico : TipoServicoResponse
+  -nome : String
+  -logradouro : String
+  -numero : String
+  -bairro : String
+  -latitude : double
+  -longitude : double
+  -capacidade : Integer
+  -funciona24h : boolean
+  -statusAprovacao : String
+  -dataCadastro : LocalDateTime
+  -perfis : List<PerfilAtendidoResponse>
+}
+class TipoServicoRequest <<record>> {
+  -nome : String
+  -icone : String
+}
+class TipoServicoResponse <<record>> {
+  -id : Integer
+  -nome : String
+  -icone : String
+  -abrigo : boolean
+}
+class TotemRequest <<record>> {
+  -codigo : String
+  -logradouro : String
+  -bairro : String
+  -latitude : Double
+  -longitude : Double
+  -status : String
+  -papelImpressora : Boolean
+  -dataInstalacao : LocalDate
+  -ultimaSincronizacao : LocalDateTime
+}
+class TotemResponse <<record>> {
+  -id : Long
+  -codigo : String
+  -logradouro : String
+  -bairro : String
+  -latitude : double
+  -longitude : double
+  -status : String
+  -papelImpressora : boolean
+  -dataInstalacao : LocalDate
+  -ultimaSincronizacao : LocalDateTime
+}
+class UsuarioPainelRequest <<record>> {
+  -organizacaoId : Long
+  -nome : String
+  -email : String
+  -perfilAcesso : String
+  -ativo : Boolean
+}
+class UsuarioPainelResponse <<record>> {
+  -id : Long
+  -organizacaoId : Long
+  -nome : String
+  -email : String
+  -perfilAcesso : String
+  -ativo : boolean
+}
+MapaServicosResponse --> "*" ServicoProximoResponse
+ServicoResponse --> "*" PerfilAtendidoResponse
+ServicoResponse --> "1" TipoServicoResponse
+AtualizacaoDisponibilidadeRequest -[hidden]down- HorarioRequest
+AtualizacaoDisponibilidadeResponse -[hidden]down- HorarioResponse
+ConsultaTotemRequest -[hidden]down- MapaServicosResponse
+ConsultaTotemResponse -[hidden]down- OrganizacaoRequest
+HorarioRequest -[hidden]down- OrganizacaoResponse
+HorarioResponse -[hidden]down- PerfilAtendidoRequest
+MapaServicosResponse -[hidden]down- PerfilAtendidoResponse
+OrganizacaoRequest -[hidden]down- ServicoProximoResponse
+OrganizacaoResponse -[hidden]down- ServicoRequest
+PerfilAtendidoRequest -[hidden]down- ServicoResponse
+PerfilAtendidoResponse -[hidden]down- TipoServicoRequest
+ServicoProximoResponse -[hidden]down- TipoServicoResponse
+ServicoRequest -[hidden]down- TotemRequest
+ServicoResponse -[hidden]down- TotemResponse
+TipoServicoRequest -[hidden]down- UsuarioPainelRequest
+TipoServicoResponse -[hidden]down- UsuarioPainelResponse
+@enduml
