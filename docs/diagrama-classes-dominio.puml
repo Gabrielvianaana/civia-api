@@ -1,0 +1,312 @@
+@startuml
+title CIVIA - Camada de dominio (modelo, value objects, excecoes e DAOs)
+' Gerado a partir do codigo-fonte Java (pasta civia-*/src/main/java).
+!pragma layout smetana
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam packageStyle rectangle
+hide empty members
+package "br.com.fiap.civia.domain.dao" {
+  interface AtualizacaoDisponibilidadeDAO {
+    +salvar(atualizacao: AtualizacaoDisponibilidade) : AtualizacaoDisponibilidade
+    +buscarPorId(id: Long) : Optional<AtualizacaoDisponibilidade>
+    +listar(servicoId: Long) : List<AtualizacaoDisponibilidade>
+    +buscarMaisRecentesPorServicos(servicoIds: Collection<Long>) : Map<Long, AtualizacaoDisponibilidade>
+    +existePorUsuario(usuarioId: Long) : boolean
+    +excluir(id: Long) : void
+    +excluirPorServico(servicoId: Long) : void
+  }
+  interface ConsultaTotemDAO {
+    +salvar(consulta: ConsultaTotem) : ConsultaTotem
+    +buscarPorId(id: Long) : Optional<ConsultaTotem>
+    +buscarPorCodigoChegada(codigo: String) : Optional<ConsultaTotem>
+    +listar(totemId: Long) : List<ConsultaTotem>
+    +existePorCodigoChegada(codigo: String) : boolean
+    +existePorTotem(totemId: Long) : boolean
+    +existePorServico(servicoId: Long) : boolean
+    +existePorTipo(tipoServicoId: Integer) : boolean
+    +existePorPerfil(perfilId: Integer) : boolean
+    +excluir(id: Long) : void
+  }
+  interface HorarioDAO {
+    +salvar(horario: Horario) : Horario
+    +buscarPorId(id: Long) : Optional<Horario>
+    +listarPorServico(servicoId: Long) : List<Horario>
+    +listarPorServicos(servicoIds: Collection<Long>) : Map<Long, List<Horario>>
+    +existe(servicoId: Long, diaSemana: int, abertura: LocalTime, idIgnorado: Long) : boolean
+    +excluir(id: Long) : void
+    +excluirPorServico(servicoId: Long) : void
+  }
+  interface OrganizacaoDAO {
+    +salvar(organizacao: Organizacao) : Organizacao
+    +buscarPorId(id: Long) : Optional<Organizacao>
+    +listar(tipo: TipoOrganizacao) : List<Organizacao>
+    +existePorId(id: Long) : boolean
+    +existePorNome(nome: String, idIgnorado: Long) : boolean
+    +excluir(id: Long) : void
+  }
+  interface PerfilAtendidoDAO {
+    +salvar(perfil: PerfilAtendido) : PerfilAtendido
+    +buscarPorId(id: Integer) : Optional<PerfilAtendido>
+    +buscarPorIds(ids: Collection<Integer>) : List<PerfilAtendido>
+    +listar() : List<PerfilAtendido>
+    +existePorDescricao(descricao: String, idIgnorado: Integer) : boolean
+    +contar() : long
+    +excluir(id: Integer) : void
+  }
+  interface ServicoDAO {
+    +salvar(servico: Servico) : Servico
+    +buscarPorId(id: Long) : Optional<Servico>
+    +listar(tipoServicoId: Integer, statusAprovacao: StatusAprovacao, organizacaoId: Long) : List<Servico>
+    +existePorId(id: Long) : boolean
+    +existePorOrganizacao(organizacaoId: Long) : boolean
+    +existePorTipo(tipoServicoId: Integer) : boolean
+    +existePorPerfil(perfilId: Integer) : boolean
+    +excluir(id: Long) : void
+  }
+  interface TipoServicoDAO {
+    +salvar(tipo: TipoServico) : TipoServico
+    +buscarPorId(id: Integer) : Optional<TipoServico>
+    +listar() : List<TipoServico>
+    +existePorNome(nome: String, idIgnorado: Integer) : boolean
+    +contar() : long
+    +excluir(id: Integer) : void
+  }
+  interface TotemDAO {
+    +salvar(totem: Totem) : Totem
+    +buscarPorId(id: Long) : Optional<Totem>
+    +listar() : List<Totem>
+    +existePorCodigo(codigo: String, idIgnorado: Long) : boolean
+    +excluir(id: Long) : void
+  }
+  interface UsuarioPainelDAO {
+    +salvar(usuario: UsuarioPainel) : UsuarioPainel
+    +buscarPorId(id: Long) : Optional<UsuarioPainel>
+    +listar(organizacaoId: Long) : List<UsuarioPainel>
+    +existePorEmail(email: String, idIgnorado: Long) : boolean
+    +existePorOrganizacao(organizacaoId: Long) : boolean
+    +excluir(id: Long) : void
+  }
+}
+package "br.com.fiap.civia.domain.exception" {
+  class DadoInvalidoException {
+  }
+  abstract class DomainException {
+  }
+  class RegraNegocioVioladaException {
+  }
+}
+package "br.com.fiap.civia.domain.model" {
+  class AtualizacaoDisponibilidade {
+    +{static} MAXIMO_VAGAS : int
+    -id : Long
+    -servicoId : Long
+    -usuarioId : Long
+    -status : StatusDisponibilidade
+    -vagas : Integer
+    -origem : OrigemAtualizacao
+    -dataHora : LocalDateTime
+    +{static} registrar(servico: Servico, usuarioId: Long, status: StatusDisponibilidade, vagas: Integer, origem: OrigemAtualizacao, dataHora: LocalDateTime) : AtualizacaoDisponibilidade
+    +{static} reconstituir(id: Long, servicoId: Long, usuarioId: Long, status: StatusDisponibilidade, vagas: Integer, origem: OrigemAtualizacao, dataHora: LocalDateTime) : AtualizacaoDisponibilidade
+    +corrigir(servico: Servico, usuarioId: Long, status: StatusDisponibilidade, vagas: Integer, origem: OrigemAtualizacao, dataHora: LocalDateTime) : void
+    +ehAnteriorA(instante: LocalDateTime) : boolean
+  }
+  class ConsultaTotem {
+    +{static} TAMANHO_CODIGO : int
+    -id : Long
+    -totemId : Long
+    -tipoServicoId : Integer
+    -perfilId : Integer
+    -servicoEscolhidoId : Long
+    -dataConsulta : LocalDateTime
+    -imprimiuRota : boolean
+    -pediuAbordagem : boolean
+    -codigoChegada : String
+    -dataChegada : LocalDateTime
+    +{static} registrar(totemId: Long, tipoServicoId: Integer, perfilId: Integer, servicoEscolhidoId: Long, dataConsulta: LocalDateTime, imprimiuRota: boolean, pediuAbordagem: boolean, codigoGerado: String) : ConsultaTotem
+    +{static} reconstituir(id: Long, totemId: Long, tipoServicoId: Integer, perfilId: Integer, servicoEscolhidoId: Long, dataConsulta: LocalDateTime, imprimiuRota: boolean, pediuAbordagem: boolean, codigoChegada: String, dataChegada: LocalDateTime) : ConsultaTotem
+    +atualizar(totemId: Long, tipoServicoId: Integer, perfilId: Integer, servicoEscolhidoId: Long, imprimiuRota: boolean, pediuAbordagem: boolean, codigoGerado: String) : void
+    +registrarChegada(instante: LocalDateTime) : void
+    +chegadaRegistrada() : boolean
+  }
+  class GradeHorario <<record>> {
+    -funciona24h : boolean
+    -horarios : List<Horario>
+    +estaAbertoEm(instante: LocalDateTime) : boolean
+    +faixaAtual(instante: LocalDateTime) : Optional<Horario>
+    +proximaAberturaNoDia(instante: LocalDateTime) : Optional<Horario>
+  }
+  class Horario {
+    +{static} FIM_DO_DIA : LocalTime
+    -id : Long
+    -servicoId : Long
+    -diaSemana : int
+    -abertura : LocalTime
+    -fechamento : LocalTime
+    +{static} novo(servicoId: Long, diaSemana: Integer, abertura: LocalTime, fechamento: LocalTime) : Horario
+    +{static} reconstituir(id: Long, servicoId: Long, diaSemana: int, abertura: LocalTime, fechamento: LocalTime) : Horario
+    +atualizar(diaSemana: Integer, abertura: LocalTime, fechamento: LocalTime) : void
+    +{static} diaSemanaDe(dia: DayOfWeek) : int
+    +{static} nomeDoDia(diaSemana: int) : String
+    +abrangeInstante(instante: LocalDateTime) : boolean
+  }
+  class Organizacao {
+    -id : Long
+    -nome : String
+    -tipo : TipoOrganizacao
+    -telefone : String
+    -email : String
+    +{static} nova(nome: String, tipo: TipoOrganizacao, telefone: String, email: String) : Organizacao
+    +{static} reconstituir(id: Long, nome: String, tipo: TipoOrganizacao, telefone: String, email: String) : Organizacao
+    +atualizar(nome: String, tipo: TipoOrganizacao, telefone: String, email: String) : void
+  }
+  enum OrigemAtualizacao {
+    PAINEL
+    CENTRAL_VAGAS
+  }
+  enum PerfilAcesso {
+    GESTOR
+    EQUIPE
+    COOPERATIVA
+  }
+  class PerfilAtendido {
+    -id : Integer
+    -descricao : String
+    +{static} novo(descricao: String) : PerfilAtendido
+    +{static} reconstituir(id: Integer, descricao: String) : PerfilAtendido
+    +atualizar(descricao: String) : void
+    +temDescricao(outra: String) : boolean
+  }
+  class Servico {
+    +{static} CAPACIDADE_MAXIMA : int
+    -id : Long
+    -organizacaoId : Long
+    -tipo : TipoServico
+    -nome : String
+    -endereco : Endereco
+    -coordenada : Coordenada
+    -capacidade : Integer
+    -funciona24h : boolean
+    -statusAprovacao : StatusAprovacao
+    -dataCadastro : LocalDateTime
+    -perfis : Set<PerfilAtendido>
+    +{static} novo(organizacaoId: Long, tipo: TipoServico, nome: String, endereco: Endereco, coordenada: Coordenada, capacidade: Integer, funciona24h: boolean, statusAprovacao: StatusAprovacao, dataCadastro: LocalDateTime, perfis: Set<PerfilAtendido>) : Servico
+    +{static} reconstituir(id: Long, organizacaoId: Long, tipo: TipoServico, nome: String, endereco: Endereco, coordenada: Coordenada, capacidade: Integer, funciona24h: boolean, statusAprovacao: StatusAprovacao, dataCadastro: LocalDateTime, perfis: Set<PerfilAtendido>) : Servico
+    +atualizar(organizacaoId: Long, tipo: TipoServico, nome: String, endereco: Endereco, coordenada: Coordenada, capacidade: Integer, funciona24h: boolean, statusAprovacao: StatusAprovacao, perfis: Set<PerfilAtendido>) : void
+    +ehAbrigo() : boolean
+    +estaAprovado() : boolean
+    +atendePerfil(perfil: PerfilAtendido) : boolean
+    +getPerfis() : Set<PerfilAtendido>
+  }
+  enum SituacaoServico {
+    ABERTO
+    FILA_GRANDE
+    LOTADO
+    FECHADO
+  }
+  enum StatusAprovacao {
+    PENDENTE
+    APROVADO
+    REPROVADO
+  }
+  enum StatusDisponibilidade {
+    TEM_VAGA
+    POUCAS_VAGAS
+    ABERTO
+    FILA_GRANDE
+    LOTADO
+    FECHADO
+    SEM_ATUALIZACAO_RECENTE
+    -grupoOrdenacao : int
+    -exigeVagas : boolean
+    +getGrupoOrdenacao() : int
+    +exigeVagas() : boolean
+    +{static} de(situacao: SituacaoServico) : StatusDisponibilidade
+  }
+  enum StatusTotem {
+    ONLINE
+    OFFLINE
+    MANUTENCAO
+  }
+  enum TipoOrganizacao {
+    CENTRO_POP
+    ONG
+    COOPERATIVA
+    PREFEITURA
+    PARCEIRO
+  }
+  class TipoServico {
+    +{static} NOME_ABRIGO : String
+    -id : Integer
+    -nome : String
+    -icone : String
+    +{static} novo(nome: String, icone: String) : TipoServico
+    +{static} reconstituir(id: Integer, nome: String, icone: String) : TipoServico
+    +atualizar(nome: String, icone: String) : void
+    +ehAbrigo() : boolean
+    +temNome(outro: String) : boolean
+    +{static} normalizar(texto: String) : String
+  }
+  class Totem {
+    -id : Long
+    -codigo : String
+    -endereco : Endereco
+    -coordenada : Coordenada
+    -status : StatusTotem
+    -papelImpressora : boolean
+    -dataInstalacao : LocalDate
+    -ultimaSincronizacao : LocalDateTime
+    +{static} novo(codigo: String, endereco: Endereco, coordenada: Coordenada, status: StatusTotem, papelImpressora: boolean, dataInstalacao: LocalDate, ultimaSincronizacao: LocalDateTime) : Totem
+    +{static} reconstituir(id: Long, codigo: String, endereco: Endereco, coordenada: Coordenada, status: StatusTotem, papelImpressora: boolean, dataInstalacao: LocalDate, ultimaSincronizacao: LocalDateTime) : Totem
+    +atualizar(codigo: String, endereco: Endereco, coordenada: Coordenada, status: StatusTotem, papelImpressora: boolean, dataInstalacao: LocalDate, ultimaSincronizacao: LocalDateTime) : void
+    +garantirDisponivelParaConsulta() : void
+  }
+  class UsuarioPainel {
+    -id : Long
+    -organizacaoId : Long
+    -nome : String
+    -email : String
+    -perfilAcesso : PerfilAcesso
+    -ativo : boolean
+    +{static} novo(organizacaoId: Long, nome: String, email: String, perfilAcesso: PerfilAcesso, ativo: boolean) : UsuarioPainel
+    +{static} reconstituir(id: Long, organizacaoId: Long, nome: String, email: String, perfilAcesso: PerfilAcesso, ativo: boolean) : UsuarioPainel
+    +atualizar(organizacaoId: Long, nome: String, email: String, perfilAcesso: PerfilAcesso, ativo: boolean) : void
+    +garantirPodeAtualizar(servico: Servico) : void
+  }
+  class Validacoes {
+    +{static} textoObrigatorio(valor: String, campo: String, tamanhoMaximo: int) : String
+    +{static} textoOpcional(valor: String, campo: String, tamanhoMaximo: int) : String
+    +{static} emailOpcional(valor: String, campo: String) : String
+    +{static} obrigatorio(valor: T, mensagem: String) : T
+  }
+}
+package "br.com.fiap.civia.domain.valueobject" {
+  class Coordenada <<record>> {
+    -latitude : double
+    -longitude : double
+    +{static} de(latitude: Double, longitude: Double) : Coordenada
+    +distanciaEmMetrosAte(destino: Coordenada) : double
+  }
+  class Endereco <<record>> {
+    -logradouro : String
+    -numero : String
+    -bairro : String
+    +formatado() : String
+  }
+}
+AtualizacaoDisponibilidade --> "1" OrigemAtualizacao
+AtualizacaoDisponibilidade --> "1" StatusDisponibilidade
+DomainException <|-- DadoInvalidoException
+DomainException <|-- RegraNegocioVioladaException
+GradeHorario --> "*" Horario
+Organizacao --> "1" TipoOrganizacao
+Servico --> "*" PerfilAtendido
+Servico --> "1" Coordenada
+Servico --> "1" Endereco
+Servico --> "1" StatusAprovacao
+Servico --> "1" TipoServico
+Totem --> "1" Coordenada
+Totem --> "1" Endereco
+Totem --> "1" StatusTotem
+UsuarioPainel --> "1" PerfilAcesso
+@enduml

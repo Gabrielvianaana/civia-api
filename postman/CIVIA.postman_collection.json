@@ -1,0 +1,1721 @@
+{
+  "info": {
+    "name": "CIVIA API - Global Solution 2026",
+    "description": "API RESTful da CIVIA (mapa de servicos para totens). Rode na ordem (Collection Runner): cada pasta cria registros, consulta, testa os erros e a pasta 11 apaga o que foi criado. Troque a variavel baseUrl para a URL do Render para testar o deploy.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "tipoId",
+      "value": ""
+    },
+    {
+      "key": "perfilId",
+      "value": ""
+    },
+    {
+      "key": "organizacaoId",
+      "value": ""
+    },
+    {
+      "key": "usuarioId",
+      "value": ""
+    },
+    {
+      "key": "servicoId",
+      "value": ""
+    },
+    {
+      "key": "horarioId",
+      "value": ""
+    },
+    {
+      "key": "atualizacaoId",
+      "value": ""
+    },
+    {
+      "key": "totemId",
+      "value": ""
+    },
+    {
+      "key": "consultaId",
+      "value": ""
+    },
+    {
+      "key": "codigoChegada",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "00 - Saude",
+      "item": [
+        {
+          "name": "Health (conexao com o Oracle)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/actuator/health"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "01 - Tipos de servico (T_TIPO_SERVICO)",
+      "item": [
+        {
+          "name": "Listar tipos",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tipos-servico"
+            }
+          }
+        },
+        {
+          "name": "Cadastrar tipo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 201\", function () { pm.response.to.have.status(201); });",
+                  "pm.collectionVariables.set(\"tipoId\", pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tipos-servico"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Saude\",\n  \"icone\": \"cruz\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Buscar tipo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tipos-servico/{{tipoId}}"
+            }
+          }
+        },
+        {
+          "name": "Atualizar tipo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tipos-servico/{{tipoId}}"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Saude e documentos\",\n  \"icone\": \"cruz\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 - Perfis atendidos (T_PERFIL_ATENDIDO)",
+      "item": [
+        {
+          "name": "Listar perfis",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/perfis"
+            }
+          }
+        },
+        {
+          "name": "Cadastrar perfil",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 201\", function () { pm.response.to.have.status(201); });",
+                  "pm.collectionVariables.set(\"perfilId\", pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/perfis"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"descricao\": \"Pessoa migrante\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Buscar perfil",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/perfis/{{perfilId}}"
+            }
+          }
+        },
+        {
+          "name": "Atualizar perfil",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/perfis/{{perfilId}}"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"descricao\": \"Pessoa migrante ou refugiada\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 - Organizacoes (T_ORGANIZACAO)",
+      "item": [
+        {
+          "name": "Listar organizacoes (filtro opcional por tipo)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/organizacoes?tipo=ONG"
+            }
+          }
+        },
+        {
+          "name": "Cadastrar organizacao",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 201\", function () { pm.response.to.have.status(201); });",
+                  "pm.collectionVariables.set(\"organizacaoId\", pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/organizacoes"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"ONG Teste Postman (simulada)\",\n  \"tipo\": \"ONG\",\n  \"telefone\": \"11900000099\",\n  \"email\": \"postman@civia.exemplo.org\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Buscar organizacao",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/organizacoes/{{organizacaoId}}"
+            }
+          }
+        },
+        {
+          "name": "Atualizar organizacao",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/organizacoes/{{organizacaoId}}"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"ONG Teste Postman (simulada)\",\n  \"tipo\": \"ONG\",\n  \"telefone\": \"11900000098\",\n  \"email\": \"postman@civia.exemplo.org\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 - Usuarios do painel (T_USUARIO_PAINEL)",
+      "item": [
+        {
+          "name": "Listar usuarios (filtro opcional por organizacao)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/usuarios"
+            }
+          }
+        },
+        {
+          "name": "Cadastrar usuario",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 201\", function () { pm.response.to.have.status(201); });",
+                  "pm.collectionVariables.set(\"usuarioId\", pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/usuarios"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"organizacaoId\": {{organizacaoId}},\n  \"nome\": \"Equipe Postman (simulada)\",\n  \"email\": \"equipe.postman@civia.exemplo.org\",\n  \"perfilAcesso\": \"EQUIPE\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Buscar usuario",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/usuarios/{{usuarioId}}"
+            }
+          }
+        },
+        {
+          "name": "Atualizar usuario",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/usuarios/{{usuarioId}}"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"organizacaoId\": {{organizacaoId}},\n  \"nome\": \"Equipe Postman (simulada)\",\n  \"email\": \"equipe.postman@civia.exemplo.org\",\n  \"perfilAcesso\": \"EQUIPE\",\n  \"ativo\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 - Servicos (T_SERVICO e T_SERVICO_PERFIL)",
+      "item": [
+        {
+          "name": "Listar servicos (filtros opcionais)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/servicos?statusAprovacao=APROVADO"
+            }
+          }
+        },
+        {
+          "name": "Cadastrar servico (abrigo)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 201\", function () { pm.response.to.have.status(201); });",
+                  "pm.collectionVariables.set(\"servicoId\", pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/servicos"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"organizacaoId\": {{organizacaoId}},\n  \"tipoServicoId\": 1,\n  \"nome\": \"Abrigo Postman (simulado)\",\n  \"logradouro\": \"Rua Teste\",\n  \"numero\": \"100\",\n  \"bairro\": \"Se\",\n  \"latitude\": -23.5512,\n  \"longitude\": -46.634,\n  \"capacidade\": 20,\n  \"funciona24h\": false,\n  \"statusAprovacao\": \"APROVADO\",\n  \"perfilIds\": [\n    2,\n    {{perfilId}}\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Buscar servico",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/servicos/{{servicoId}}"
+            }
+          }
+        },
+        {
+          "name": "Atualizar servico",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/servicos/{{servicoId}}"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"organizacaoId\": {{organizacaoId}},\n  \"tipoServicoId\": 1,\n  \"nome\": \"Abrigo Postman (simulado)\",\n  \"logradouro\": \"Rua Teste\",\n  \"numero\": \"100\",\n  \"bairro\": \"Se\",\n  \"latitude\": -23.5512,\n  \"longitude\": -46.634,\n  \"capacidade\": 25,\n  \"funciona24h\": true,\n  \"statusAprovacao\": \"APROVADO\",\n  \"perfilIds\": [\n    2,\n    3,\n    {{perfilId}}\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "06 - Horarios (T_HORARIO) - sub-recurso de servico",
+      "item": [
+        {
+          "name": "Listar horarios de um servico",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/servicos/1/horarios"
+            }
+          }
+        },
+        {
+          "name": "Cadastrar horario (quarta, 18:00-23:59)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 201\", function () { pm.response.to.have.status(201); });",
+                  "pm.collectionVariables.set(\"horarioId\", pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/servicos/5/horarios"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"diaSemana\": 4,\n  \"horaAbertura\": \"18:00\",\n  \"horaFechamento\": \"23:59\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Buscar horario",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/servicos/5/horarios/{{horarioId}}"
+            }
+          }
+        },
+        {
+          "name": "Atualizar horario",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/servicos/5/horarios/{{horarioId}}"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"diaSemana\": 4,\n  \"horaAbertura\": \"19:00\",\n  \"horaFechamento\": \"22:00\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "07 - Atualizacoes de disponibilidade (T_ATUALIZACAO)",
+      "item": [
+        {
+          "name": "Registrar vagas de abrigo pelo painel (RN03: grava a faixa)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 201\", function () { pm.response.to.have.status(201); });",
+                  "pm.collectionVariables.set(\"atualizacaoId\", pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/atualizacoes"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"servicoId\": {{servicoId}},\n  \"origem\": \"PAINEL\",\n  \"usuarioId\": {{usuarioId}},\n  \"vagas\": 3\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Registrar vagas pela Central de Vagas (sem usuario)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 201\", function () { pm.response.to.have.status(201); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/atualizacoes"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"servicoId\": {{servicoId}},\n  \"origem\": \"CENTRAL_VAGAS\",\n  \"vagas\": 12\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Listar atualizacoes de um servico",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/atualizacoes?servicoId={{servicoId}}"
+            }
+          }
+        },
+        {
+          "name": "Buscar atualizacao",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/atualizacoes/{{atualizacaoId}}"
+            }
+          }
+        },
+        {
+          "name": "Corrigir atualizacao",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/atualizacoes/{{atualizacaoId}}"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"servicoId\": {{servicoId}},\n  \"origem\": \"PAINEL\",\n  \"usuarioId\": {{usuarioId}},\n  \"vagas\": 0\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "08 - Totens (T_TOTEM) e mapa de servicos",
+      "item": [
+        {
+          "name": "Listar totens",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/totens"
+            }
+          }
+        },
+        {
+          "name": "Cadastrar totem",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 201\", function () { pm.response.to.have.status(201); });",
+                  "pm.collectionVariables.set(\"totemId\", pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/totens"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"codigo\": \"TOT-PM-01\",\n  \"logradouro\": \"Praca Teste Postman\",\n  \"bairro\": \"Se\",\n  \"latitude\": -23.5508,\n  \"longitude\": -46.6335,\n  \"papelImpressora\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Buscar totem",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/totens/{{totemId}}"
+            }
+          }
+        },
+        {
+          "name": "Atualizar totem",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/totens/{{totemId}}"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"codigo\": \"TOT-PM-01\",\n  \"logradouro\": \"Praca Teste Postman\",\n  \"bairro\": \"Se\",\n  \"latitude\": -23.5508,\n  \"longitude\": -46.6335,\n  \"status\": \"ONLINE\",\n  \"papelImpressora\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Mapa: 3 abrigos mais proximos para mulher",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/totens/1/servicos?tipo=Abrigo&perfil=Mulher"
+            }
+          }
+        },
+        {
+          "name": "Mapa: refeicoes (tipo pelo id)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/totens/1/servicos?tipo=2"
+            }
+          }
+        },
+        {
+          "name": "Mapa: todos os tipos",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/totens/{{totemId}}/servicos"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "09 - Consultas no totem (T_CONSULTA_TOTEM)",
+      "item": [
+        {
+          "name": "Registrar consulta com rota impressa (gera codigo)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 201\", function () { pm.response.to.have.status(201); });",
+                  "pm.collectionVariables.set(\"consultaId\", pm.response.json().id);",
+                  "pm.collectionVariables.set(\"codigoChegada\", pm.response.json().codigoChegada);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/consultas"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"totemId\": {{totemId}},\n  \"tipoServicoId\": 1,\n  \"perfilId\": 2,\n  \"servicoEscolhidoId\": {{servicoId}},\n  \"imprimiuRota\": true,\n  \"pediuAbordagem\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Listar consultas de um totem",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/consultas?totemId={{totemId}}"
+            }
+          }
+        },
+        {
+          "name": "Buscar consulta",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/consultas/{{consultaId}}"
+            }
+          }
+        },
+        {
+          "name": "Atualizar consulta (pediu abordagem social)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/consultas/{{consultaId}}"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"totemId\": {{totemId}},\n  \"tipoServicoId\": 1,\n  \"perfilId\": 2,\n  \"servicoEscolhidoId\": {{servicoId}},\n  \"imprimiuRota\": true,\n  \"pediuAbordagem\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Registrar chegada pelo codigo impresso (US14)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/consultas/chegada/{{codigoChegada}}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "10 - Tratamento de erros",
+      "item": [
+        {
+          "name": "400 - campos invalidos (Bean Validation)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/servicos"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"\",\n  \"latitude\": 200\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "400 - valor de enum invalido",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/servicos?statusAprovacao=TALVEZ"
+            }
+          }
+        },
+        {
+          "name": "400 - JSON mal formado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/totens"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{ isto nao e json",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "404 - recurso inexistente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 404\", function () { pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/servicos/999999"
+            }
+          }
+        },
+        {
+          "name": "409 - codigo de totem duplicado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 409\", function () { pm.response.to.have.status(409); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/totens"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"codigo\": \"TOT-SE-01\",\n  \"logradouro\": \"Duplicado\",\n  \"bairro\": \"Se\",\n  \"latitude\": -23.55,\n  \"longitude\": -46.63\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "409 - excluir totem com consultas",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 409\", function () { pm.response.to.have.status(409); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/totens/1"
+            }
+          }
+        },
+        {
+          "name": "422 - vagas informadas para refeicao",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 422\", function () { pm.response.to.have.status(422); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/atualizacoes"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"servicoId\": 5,\n  \"usuarioId\": 2,\n  \"vagas\": 10\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "422 - equipe atualizando servico de outra organizacao",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 422\", function () { pm.response.to.have.status(422); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/atualizacoes"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"servicoId\": 5,\n  \"usuarioId\": {{usuarioId}},\n  \"situacao\": \"ABERTO\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "422 - totem em manutencao",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 422\", function () { pm.response.to.have.status(422); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/totens/3/servicos"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "11 - Limpeza (DELETE)",
+      "item": [
+        {
+          "name": "Excluir consulta",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 204\", function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/consultas/{{consultaId}}"
+            }
+          }
+        },
+        {
+          "name": "Excluir totem",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 204\", function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/totens/{{totemId}}"
+            }
+          }
+        },
+        {
+          "name": "Excluir horario",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 204\", function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/servicos/5/horarios/{{horarioId}}"
+            }
+          }
+        },
+        {
+          "name": "Excluir atualizacao",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 204\", function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/atualizacoes/{{atualizacaoId}}"
+            }
+          }
+        },
+        {
+          "name": "Excluir servico (remove horarios e atualizacoes)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 204\", function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/servicos/{{servicoId}}"
+            }
+          }
+        },
+        {
+          "name": "Excluir usuario",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 204\", function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/usuarios/{{usuarioId}}"
+            }
+          }
+        },
+        {
+          "name": "Excluir organizacao",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 204\", function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/organizacoes/{{organizacaoId}}"
+            }
+          }
+        },
+        {
+          "name": "Excluir perfil",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 204\", function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/perfis/{{perfilId}}"
+            }
+          }
+        },
+        {
+          "name": "Excluir tipo de servico",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 204\", function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tipos-servico/{{tipoId}}"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

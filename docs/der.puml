@@ -1,0 +1,187 @@
+@startuml
+title CIVIA - DER (Oracle)
+' Gerado a partir de db/01_ddl.sql
+!pragma layout smetana
+hide circle
+skinparam linetype ortho
+skinparam shadowing false
+entity "T_ORGANIZACAO" as ORGANIZACAO {
+  * **id_organizacao** : NUMBER(10) <<PK>>
+  --
+  * nm_organizacao : VARCHAR2(120) <<UK>>
+  * tp_organizacao : VARCHAR2(20)
+    nr_telefone : VARCHAR2(15)
+    ds_email : VARCHAR2(120)
+}
+entity "T_TIPO_SERVICO" as TIPO_SERVICO {
+  * **id_tipo_servico** : NUMBER(3) <<PK>>
+  --
+  * nm_tipo_servico : VARCHAR2(40) <<UK>>
+  * ds_icone : VARCHAR2(30)
+}
+entity "T_PERFIL_ATENDIDO" as PERFIL_ATENDIDO {
+  * **id_perfil** : NUMBER(3) <<PK>>
+  --
+  * ds_perfil : VARCHAR2(40) <<UK>>
+}
+entity "T_SERVICO" as SERVICO {
+  * **id_servico** : NUMBER(10) <<PK>>
+  --
+  * id_organizacao : NUMBER(10) <<FK>>
+  * id_tipo_servico : NUMBER(3) <<FK>>
+  * nm_servico : VARCHAR2(120)
+  * ds_logradouro : VARCHAR2(120)
+    nr_endereco : VARCHAR2(10)
+  * nm_bairro : VARCHAR2(60)
+  * nr_latitude : NUMBER(9,6)
+  * nr_longitude : NUMBER(9,6)
+    nr_capacidade : NUMBER(5)
+  * fl_24h : CHAR(1)
+  * st_aprovacao : VARCHAR2(10)
+  * dt_cadastro : DATE
+}
+entity "T_SERVICO_PERFIL" as SERVICO_PERFIL {
+  * **id_servico** : NUMBER(10) <<PK, FK>>
+  * **id_perfil** : NUMBER(3) <<PK, FK>>
+  --
+}
+entity "T_HORARIO" as HORARIO {
+  * **id_horario** : NUMBER(10) <<PK>>
+  --
+  * id_servico : NUMBER(10) <<FK>>
+  * nr_dia_semana : NUMBER(1)
+  * hr_abertura : VARCHAR2(5)
+  * hr_fechamento : VARCHAR2(5)
+}
+entity "T_USUARIO_PAINEL" as USUARIO_PAINEL {
+  * **id_usuario** : NUMBER(10) <<PK>>
+  --
+  * id_organizacao : NUMBER(10) <<FK>>
+  * nm_usuario : VARCHAR2(100)
+  * ds_email : VARCHAR2(120) <<UK>>
+  * tp_perfil_acesso : VARCHAR2(12)
+  * fl_ativo : CHAR(1)
+}
+entity "T_ATUALIZACAO" as ATUALIZACAO {
+  * **id_atualizacao** : NUMBER(10) <<PK>>
+  --
+  * id_servico : NUMBER(10) <<FK>>
+    id_usuario : NUMBER(10) <<FK>>
+  * st_disponibilidade : VARCHAR2(15)
+    qt_vagas : NUMBER(5)
+  * tp_origem : VARCHAR2(15)
+  * dt_atualizacao : DATE
+}
+entity "T_TOTEM" as TOTEM {
+  * **id_totem** : NUMBER(10) <<PK>>
+  --
+  * cd_totem : VARCHAR2(12) <<UK>>
+  * ds_logradouro : VARCHAR2(120)
+  * nm_bairro : VARCHAR2(60)
+  * nr_latitude : NUMBER(9,6)
+  * nr_longitude : NUMBER(9,6)
+  * st_totem : VARCHAR2(12)
+  * fl_papel_impressora : CHAR(1)
+  * dt_instalacao : DATE
+    dt_ultima_sincronizacao : DATE
+}
+entity "T_CONSULTA_TOTEM" as CONSULTA_TOTEM {
+  * **id_consulta** : NUMBER(10) <<PK>>
+  --
+  * id_totem : NUMBER(10) <<FK>>
+  * id_tipo_servico : NUMBER(3) <<FK>>
+    id_perfil : NUMBER(3) <<FK>>
+    id_servico_escolhido : NUMBER(10) <<FK>>
+  * dt_consulta : DATE
+  * fl_imprimiu_rota : CHAR(1)
+  * fl_pediu_abordagem : CHAR(1)
+    cd_chegada : VARCHAR2(8) <<UK>>
+    dt_chegada : DATE
+}
+entity "T_POSTO_RECICLAGEM" as POSTO_RECICLAGEM {
+  * **id_posto** : NUMBER(10) <<PK>>
+  --
+  * id_totem : NUMBER(10) <<FK, UK>>
+  * id_cooperativa : NUMBER(10) <<FK>>
+  * nr_capacidade_kg : NUMBER(6,2)
+  * nr_limite_diario_kg : NUMBER(5,2)
+  * st_posto : VARCHAR2(12)
+}
+entity "T_MATERIAL" as MATERIAL {
+  * **id_material** : NUMBER(3) <<PK>>
+  --
+  * nm_material : VARCHAR2(40) <<UK>>
+  * nr_creditos_por_kg : NUMBER(5)
+  * fl_aceito : CHAR(1)
+}
+entity "T_CARTAO" as CARTAO {
+  * **id_cartao** : NUMBER(10) <<PK>>
+  --
+  * cd_cartao : VARCHAR2(10) <<UK>>
+  * id_organizacao_emissora : NUMBER(10) <<FK>>
+    id_cartao_anterior : NUMBER(10) <<FK, UK>>
+  * dt_emissao : DATE
+  * st_cartao : VARCHAR2(10)
+  * nr_saldo_creditos : NUMBER(8)
+}
+entity "T_ENTREGA" as ENTREGA {
+  * **id_entrega** : NUMBER(10) <<PK>>
+  --
+  * id_cartao : NUMBER(10) <<FK>>
+  * id_posto : NUMBER(10) <<FK>>
+  * id_material : NUMBER(3) <<FK>>
+  * nr_peso_kg : NUMBER(5,2)
+  * nr_creditos_gerados : NUMBER(6)
+  * dt_entrega : DATE
+}
+entity "T_RECOMPENSA" as RECOMPENSA {
+  * **id_recompensa** : NUMBER(10) <<PK>>
+  --
+  * id_organizacao_parceira : NUMBER(10) <<FK>>
+  * nm_recompensa : VARCHAR2(80) <<UK>>
+  * nr_custo_creditos : NUMBER(6)
+  * fl_ativo : CHAR(1)
+}
+entity "T_TROCA" as TROCA {
+  * **id_troca** : NUMBER(10) <<PK>>
+  --
+  * id_cartao : NUMBER(10) <<FK>>
+  * id_recompensa : NUMBER(10) <<FK>>
+  * id_usuario : NUMBER(10) <<FK>>
+  * nr_creditos_usados : NUMBER(6)
+  * dt_troca : DATE
+}
+entity "T_COLETA" as COLETA {
+  * **id_coleta** : NUMBER(10) <<PK>>
+  --
+  * id_posto : NUMBER(10) <<FK>>
+  * id_cooperativa : NUMBER(10) <<FK>>
+  * nr_peso_total_kg : NUMBER(7,2)
+  * dt_coleta : DATE
+}
+ORGANIZACAO ||--o{ SERVICO : id_organizacao
+TIPO_SERVICO ||--o{ SERVICO : id_tipo_servico
+SERVICO ||--o{ SERVICO_PERFIL : id_servico
+PERFIL_ATENDIDO ||--o{ SERVICO_PERFIL : id_perfil
+SERVICO ||--o{ HORARIO : id_servico
+ORGANIZACAO ||--o{ USUARIO_PAINEL : id_organizacao
+SERVICO ||--o{ ATUALIZACAO : id_servico
+USUARIO_PAINEL |o--o{ ATUALIZACAO : id_usuario
+TOTEM ||--o{ CONSULTA_TOTEM : id_totem
+TIPO_SERVICO ||--o{ CONSULTA_TOTEM : id_tipo_servico
+PERFIL_ATENDIDO |o--o{ CONSULTA_TOTEM : id_perfil
+SERVICO |o--o{ CONSULTA_TOTEM : id_servico_escolhido
+TOTEM ||--o| POSTO_RECICLAGEM : id_totem
+ORGANIZACAO ||--o{ POSTO_RECICLAGEM : id_cooperativa
+ORGANIZACAO ||--o{ CARTAO : id_organizacao_emissora
+CARTAO |o--o| CARTAO : id_cartao_anterior
+CARTAO ||--o{ ENTREGA : id_cartao
+POSTO_RECICLAGEM ||--o{ ENTREGA : id_posto
+MATERIAL ||--o{ ENTREGA : id_material
+ORGANIZACAO ||--o{ RECOMPENSA : id_organizacao_parceira
+CARTAO ||--o{ TROCA : id_cartao
+RECOMPENSA ||--o{ TROCA : id_recompensa
+USUARIO_PAINEL ||--o{ TROCA : id_usuario
+POSTO_RECICLAGEM ||--o{ COLETA : id_posto
+ORGANIZACAO ||--o{ COLETA : id_cooperativa
+@enduml

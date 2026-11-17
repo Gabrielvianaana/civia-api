@@ -1,0 +1,1113 @@
+@startuml
+title CIVIA - Diagrama de classes completo
+' Gerado a partir do codigo-fonte Java (pasta civia-*/src/main/java).
+!pragma layout smetana
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam packageStyle rectangle
+hide empty members
+package "br.com.fiap.civia" {
+  class CiviaApplication {
+    +{static} FUSO_HORARIO : String
+    +{static} main(args: String[]) : void
+  }
+}
+package "br.com.fiap.civia.application.bo" {
+  class AtualizacaoDisponibilidadeBO <<Service>> {
+    -atualizacaoDAO : AtualizacaoDisponibilidadeDAO
+    -servicoDAO : ServicoDAO
+    -usuarioDAO : UsuarioPainelDAO
+    -clock : Clock
+    +listar(servicoId: Long) : List<AtualizacaoDisponibilidadeResponse>
+    +buscar(id: Long) : AtualizacaoDisponibilidadeResponse
+    +registrar(r: AtualizacaoDisponibilidadeRequest) : AtualizacaoDisponibilidadeResponse
+    +corrigir(id: Long, r: AtualizacaoDisponibilidadeRequest) : AtualizacaoDisponibilidadeResponse
+    +excluir(id: Long) : void
+  }
+  class CargaInicialBO <<Service>> {
+    -tipoDAO : TipoServicoDAO
+    -perfilDAO : PerfilAtendidoDAO
+    +carregarSeNecessario() : void
+  }
+  class ConsultaTotemBO <<Service>> {
+    -consultaDAO : ConsultaTotemDAO
+    -totemDAO : TotemDAO
+    -tipoDAO : TipoServicoDAO
+    -perfilDAO : PerfilAtendidoDAO
+    -servicoDAO : ServicoDAO
+    -clock : Clock
+    -random : RandomGenerator
+    +listar(totemId: Long) : List<ConsultaTotemResponse>
+    +buscar(id: Long) : ConsultaTotemResponse
+    +registrar(r: ConsultaTotemRequest) : ConsultaTotemResponse
+    +atualizar(id: Long, r: ConsultaTotemRequest) : ConsultaTotemResponse
+    +registrarChegada(codigo: String) : ConsultaTotemResponse
+    +excluir(id: Long) : void
+  }
+  class Disponibilidade <<record>> {
+    -status : StatusDisponibilidade
+    -mensagem : String
+    -origem : Origem
+    -dataReferencia : LocalDateTime
+  }
+  class DisponibilidadeBO <<Component>> {
+    +{static} VALIDADE_ATUALIZACAO : Duration
+    +{static} MINIMO_VAGAS_TEM_VAGA : int
+    +calcular(servico: Servico, grade: GradeHorario, ultimaAtualizacao: Optional<AtualizacaoDisponibilidade>, agora: LocalDateTime) : Disponibilidade
+    +{static} faixaDeVagas(vagas: Integer) : StatusDisponibilidade
+  }
+  class HorarioBO <<Service>> {
+    -horarioDAO : HorarioDAO
+    -servicoDAO : ServicoDAO
+    +listar(servicoId: Long) : List<HorarioResponse>
+    +buscar(servicoId: Long, id: Long) : HorarioResponse
+    +cadastrar(servicoId: Long, r: HorarioRequest) : HorarioResponse
+    +atualizar(servicoId: Long, id: Long, r: HorarioRequest) : HorarioResponse
+    +excluir(servicoId: Long, id: Long) : void
+  }
+  class MapaServicosBO <<Service>> {
+    +{static} LIMITE_RESULTADOS : int
+    +{static} METROS_POR_MINUTO : double
+    -totemDAO : TotemDAO
+    -servicoDAO : ServicoDAO
+    -tipoDAO : TipoServicoDAO
+    -perfilDAO : PerfilAtendidoDAO
+    -horarioDAO : HorarioDAO
+    -atualizacaoDAO : AtualizacaoDisponibilidadeDAO
+    -disponibilidadeBO : DisponibilidadeBO
+    -clock : Clock
+    +consultar(totemId: Long, tipo: String, perfil: String) : MapaServicosResponse
+  }
+  class OrganizacaoBO <<Service>> {
+    -organizacaoDAO : OrganizacaoDAO
+    -servicoDAO : ServicoDAO
+    -usuarioDAO : UsuarioPainelDAO
+    +listar(tipo: String) : List<OrganizacaoResponse>
+    +buscar(id: Long) : OrganizacaoResponse
+    +cadastrar(r: OrganizacaoRequest) : OrganizacaoResponse
+    +atualizar(id: Long, r: OrganizacaoRequest) : OrganizacaoResponse
+    +excluir(id: Long) : void
+  }
+  class PerfilAtendidoBO <<Service>> {
+    -perfilDAO : PerfilAtendidoDAO
+    -servicoDAO : ServicoDAO
+    -consultaDAO : ConsultaTotemDAO
+    +listar() : List<PerfilAtendidoResponse>
+    +buscar(id: Integer) : PerfilAtendidoResponse
+    +cadastrar(r: PerfilAtendidoRequest) : PerfilAtendidoResponse
+    +atualizar(id: Integer, r: PerfilAtendidoRequest) : PerfilAtendidoResponse
+    +excluir(id: Integer) : void
+  }
+  class ServicoBO <<Service>> {
+    -servicoDAO : ServicoDAO
+    -organizacaoDAO : OrganizacaoDAO
+    -tipoDAO : TipoServicoDAO
+    -perfilDAO : PerfilAtendidoDAO
+    -horarioDAO : HorarioDAO
+    -atualizacaoDAO : AtualizacaoDisponibilidadeDAO
+    -consultaDAO : ConsultaTotemDAO
+    -clock : Clock
+    +listar(tipoServicoId: Integer, statusAprovacao: String, organizacaoId: Long) : List<ServicoResponse>
+    +buscar(id: Long) : ServicoResponse
+    +cadastrar(r: ServicoRequest) : ServicoResponse
+    +atualizar(id: Long, r: ServicoRequest) : ServicoResponse
+    +excluir(id: Long) : void
+  }
+  class TipoServicoBO <<Service>> {
+    -tipoDAO : TipoServicoDAO
+    -servicoDAO : ServicoDAO
+    -consultaDAO : ConsultaTotemDAO
+    +listar() : List<TipoServicoResponse>
+    +buscar(id: Integer) : TipoServicoResponse
+    +cadastrar(r: TipoServicoRequest) : TipoServicoResponse
+    +atualizar(id: Integer, r: TipoServicoRequest) : TipoServicoResponse
+    +excluir(id: Integer) : void
+  }
+  class TotemBO <<Service>> {
+    -totemDAO : TotemDAO
+    -consultaDAO : ConsultaTotemDAO
+    -clock : Clock
+    +listar() : List<TotemResponse>
+    +buscar(id: Long) : TotemResponse
+    +cadastrar(r: TotemRequest) : TotemResponse
+    +atualizar(id: Long, r: TotemRequest) : TotemResponse
+    +excluir(id: Long) : void
+  }
+  class UsuarioPainelBO <<Service>> {
+    -usuarioDAO : UsuarioPainelDAO
+    -organizacaoDAO : OrganizacaoDAO
+    -atualizacaoDAO : AtualizacaoDisponibilidadeDAO
+    +listar(organizacaoId: Long) : List<UsuarioPainelResponse>
+    +buscar(id: Long) : UsuarioPainelResponse
+    +cadastrar(r: UsuarioPainelRequest) : UsuarioPainelResponse
+    +atualizar(id: Long, r: UsuarioPainelRequest) : UsuarioPainelResponse
+    +excluir(id: Long) : void
+  }
+}
+package "br.com.fiap.civia.application.dto" {
+  class AtualizacaoDisponibilidadeRequest <<record>> {
+    -servicoId : Long
+    -origem : String
+    -usuarioId : Long
+    -vagas : Integer
+    -situacao : String
+    -dataHora : LocalDateTime
+  }
+  class AtualizacaoDisponibilidadeResponse <<record>> {
+    -id : Long
+    -servicoId : Long
+    -usuarioId : Long
+    -status : String
+    -vagas : Integer
+    -origem : String
+    -dataHora : LocalDateTime
+  }
+  class ConsultaTotemRequest <<record>> {
+    -totemId : Long
+    -tipoServicoId : Integer
+    -perfilId : Integer
+    -servicoEscolhidoId : Long
+    -imprimiuRota : Boolean
+    -pediuAbordagem : Boolean
+  }
+  class ConsultaTotemResponse <<record>> {
+    -id : Long
+    -totemId : Long
+    -tipoServicoId : Integer
+    -perfilId : Integer
+    -servicoEscolhidoId : Long
+    -dataConsulta : LocalDateTime
+    -imprimiuRota : boolean
+    -pediuAbordagem : boolean
+    -codigoChegada : String
+    -dataChegada : LocalDateTime
+  }
+  class HorarioRequest <<record>> {
+    -diaSemana : Integer
+    -horaAbertura : String
+    -horaFechamento : String
+  }
+  class HorarioResponse <<record>> {
+    -id : Long
+    -servicoId : Long
+    -diaSemana : int
+    -nomeDia : String
+    -horaAbertura : String
+    -horaFechamento : String
+  }
+  class MapaServicosResponse <<record>> {
+    -totemId : Long
+    -codigoTotem : String
+    -tipoServicoFiltrado : String
+    -perfilFiltrado : String
+    -consultadoEm : LocalDateTime
+    -servicos : List<ServicoProximoResponse>
+    -orientacao : String
+  }
+  class OrganizacaoRequest <<record>> {
+    -nome : String
+    -tipo : String
+    -telefone : String
+    -email : String
+  }
+  class OrganizacaoResponse <<record>> {
+    -id : Long
+    -nome : String
+    -tipo : String
+    -telefone : String
+    -email : String
+  }
+  class PerfilAtendidoRequest <<record>> {
+    -descricao : String
+  }
+  class PerfilAtendidoResponse <<record>> {
+    -id : Integer
+    -descricao : String
+  }
+  class ServicoProximoResponse <<record>> {
+    -servicoId : Long
+    -nome : String
+    -tipoServico : String
+    -endereco : String
+    -latitude : double
+    -longitude : double
+    -distanciaMetros : long
+    -minutosCaminhada : long
+    -status : String
+    -mensagem : String
+    -origemInformacao : String
+    -ultimaAtualizacao : LocalDateTime
+    -minutosDesdeAtualizacao : Long
+  }
+  class ServicoRequest <<record>> {
+    -organizacaoId : Long
+    -tipoServicoId : Integer
+    -nome : String
+    -logradouro : String
+    -numero : String
+    -bairro : String
+    -latitude : Double
+    -longitude : Double
+    -capacidade : Integer
+    -funciona24h : Boolean
+    -statusAprovacao : String
+    -perfilIds : Set<Integer>
+  }
+  class ServicoResponse <<record>> {
+    -id : Long
+    -organizacaoId : Long
+    -tipoServico : TipoServicoResponse
+    -nome : String
+    -logradouro : String
+    -numero : String
+    -bairro : String
+    -latitude : double
+    -longitude : double
+    -capacidade : Integer
+    -funciona24h : boolean
+    -statusAprovacao : String
+    -dataCadastro : LocalDateTime
+    -perfis : List<PerfilAtendidoResponse>
+  }
+  class TipoServicoRequest <<record>> {
+    -nome : String
+    -icone : String
+  }
+  class TipoServicoResponse <<record>> {
+    -id : Integer
+    -nome : String
+    -icone : String
+    -abrigo : boolean
+  }
+  class TotemRequest <<record>> {
+    -codigo : String
+    -logradouro : String
+    -bairro : String
+    -latitude : Double
+    -longitude : Double
+    -status : String
+    -papelImpressora : Boolean
+    -dataInstalacao : LocalDate
+    -ultimaSincronizacao : LocalDateTime
+  }
+  class TotemResponse <<record>> {
+    -id : Long
+    -codigo : String
+    -logradouro : String
+    -bairro : String
+    -latitude : double
+    -longitude : double
+    -status : String
+    -papelImpressora : boolean
+    -dataInstalacao : LocalDate
+    -ultimaSincronizacao : LocalDateTime
+  }
+  class UsuarioPainelRequest <<record>> {
+    -organizacaoId : Long
+    -nome : String
+    -email : String
+    -perfilAcesso : String
+    -ativo : Boolean
+  }
+  class UsuarioPainelResponse <<record>> {
+    -id : Long
+    -organizacaoId : Long
+    -nome : String
+    -email : String
+    -perfilAcesso : String
+    -ativo : boolean
+  }
+  class ValidacaoPatterns {
+    +{static} HORA : String
+  }
+}
+package "br.com.fiap.civia.application.exception" {
+  class ConflitoException {
+  }
+  class DadosInvalidosException {
+  }
+  class RecursoNaoEncontradoException {
+  }
+  class RegraNegocioException {
+  }
+  class TradutorExcecaoDominio {
+    +{static} executar(acao: Supplier<T>) : T
+    +{static} executar(acao: Runnable) : void
+  }
+}
+package "br.com.fiap.civia.application.mapper" {
+  class Conversor {
+    +{static} FORMATO_HORA : DateTimeFormatter
+    +{static} paraHora(valor: String, campo: String) : LocalTime
+    +{static} deHora(hora: LocalTime) : String
+  }
+  class DtoMapper {
+    +{static} paraResponse(o: Organizacao) : OrganizacaoResponse
+    +{static} paraResponse(t: TipoServico) : TipoServicoResponse
+    +{static} paraResponse(p: PerfilAtendido) : PerfilAtendidoResponse
+    +{static} paraResponse(s: Servico) : ServicoResponse
+    +{static} paraResponse(h: Horario) : HorarioResponse
+    +{static} paraResponse(u: UsuarioPainel) : UsuarioPainelResponse
+    +{static} paraResponse(a: AtualizacaoDisponibilidade) : AtualizacaoDisponibilidadeResponse
+    +{static} paraResponse(t: Totem) : TotemResponse
+    +{static} paraResponse(c: ConsultaTotem) : ConsultaTotemResponse
+  }
+}
+package "br.com.fiap.civia.domain.dao" {
+  interface AtualizacaoDisponibilidadeDAO {
+    +salvar(atualizacao: AtualizacaoDisponibilidade) : AtualizacaoDisponibilidade
+    +buscarPorId(id: Long) : Optional<AtualizacaoDisponibilidade>
+    +listar(servicoId: Long) : List<AtualizacaoDisponibilidade>
+    +buscarMaisRecentesPorServicos(servicoIds: Collection<Long>) : Map<Long, AtualizacaoDisponibilidade>
+    +existePorUsuario(usuarioId: Long) : boolean
+    +excluir(id: Long) : void
+    +excluirPorServico(servicoId: Long) : void
+  }
+  interface ConsultaTotemDAO {
+    +salvar(consulta: ConsultaTotem) : ConsultaTotem
+    +buscarPorId(id: Long) : Optional<ConsultaTotem>
+    +buscarPorCodigoChegada(codigo: String) : Optional<ConsultaTotem>
+    +listar(totemId: Long) : List<ConsultaTotem>
+    +existePorCodigoChegada(codigo: String) : boolean
+    +existePorTotem(totemId: Long) : boolean
+    +existePorServico(servicoId: Long) : boolean
+    +existePorTipo(tipoServicoId: Integer) : boolean
+    +existePorPerfil(perfilId: Integer) : boolean
+    +excluir(id: Long) : void
+  }
+  interface HorarioDAO {
+    +salvar(horario: Horario) : Horario
+    +buscarPorId(id: Long) : Optional<Horario>
+    +listarPorServico(servicoId: Long) : List<Horario>
+    +listarPorServicos(servicoIds: Collection<Long>) : Map<Long, List<Horario>>
+    +existe(servicoId: Long, diaSemana: int, abertura: LocalTime, idIgnorado: Long) : boolean
+    +excluir(id: Long) : void
+    +excluirPorServico(servicoId: Long) : void
+  }
+  interface OrganizacaoDAO {
+    +salvar(organizacao: Organizacao) : Organizacao
+    +buscarPorId(id: Long) : Optional<Organizacao>
+    +listar(tipo: TipoOrganizacao) : List<Organizacao>
+    +existePorId(id: Long) : boolean
+    +existePorNome(nome: String, idIgnorado: Long) : boolean
+    +excluir(id: Long) : void
+  }
+  interface PerfilAtendidoDAO {
+    +salvar(perfil: PerfilAtendido) : PerfilAtendido
+    +buscarPorId(id: Integer) : Optional<PerfilAtendido>
+    +buscarPorIds(ids: Collection<Integer>) : List<PerfilAtendido>
+    +listar() : List<PerfilAtendido>
+    +existePorDescricao(descricao: String, idIgnorado: Integer) : boolean
+    +contar() : long
+    +excluir(id: Integer) : void
+  }
+  interface ServicoDAO {
+    +salvar(servico: Servico) : Servico
+    +buscarPorId(id: Long) : Optional<Servico>
+    +listar(tipoServicoId: Integer, statusAprovacao: StatusAprovacao, organizacaoId: Long) : List<Servico>
+    +existePorId(id: Long) : boolean
+    +existePorOrganizacao(organizacaoId: Long) : boolean
+    +existePorTipo(tipoServicoId: Integer) : boolean
+    +existePorPerfil(perfilId: Integer) : boolean
+    +excluir(id: Long) : void
+  }
+  interface TipoServicoDAO {
+    +salvar(tipo: TipoServico) : TipoServico
+    +buscarPorId(id: Integer) : Optional<TipoServico>
+    +listar() : List<TipoServico>
+    +existePorNome(nome: String, idIgnorado: Integer) : boolean
+    +contar() : long
+    +excluir(id: Integer) : void
+  }
+  interface TotemDAO {
+    +salvar(totem: Totem) : Totem
+    +buscarPorId(id: Long) : Optional<Totem>
+    +listar() : List<Totem>
+    +existePorCodigo(codigo: String, idIgnorado: Long) : boolean
+    +excluir(id: Long) : void
+  }
+  interface UsuarioPainelDAO {
+    +salvar(usuario: UsuarioPainel) : UsuarioPainel
+    +buscarPorId(id: Long) : Optional<UsuarioPainel>
+    +listar(organizacaoId: Long) : List<UsuarioPainel>
+    +existePorEmail(email: String, idIgnorado: Long) : boolean
+    +existePorOrganizacao(organizacaoId: Long) : boolean
+    +excluir(id: Long) : void
+  }
+}
+package "br.com.fiap.civia.domain.exception" {
+  class DadoInvalidoException {
+  }
+  abstract class DomainException {
+  }
+  class RegraNegocioVioladaException {
+  }
+}
+package "br.com.fiap.civia.domain.model" {
+  class AtualizacaoDisponibilidade {
+    +{static} MAXIMO_VAGAS : int
+    -id : Long
+    -servicoId : Long
+    -usuarioId : Long
+    -status : StatusDisponibilidade
+    -vagas : Integer
+    -origem : OrigemAtualizacao
+    -dataHora : LocalDateTime
+    +{static} registrar(servico: Servico, usuarioId: Long, status: StatusDisponibilidade, vagas: Integer, origem: OrigemAtualizacao, dataHora: LocalDateTime) : AtualizacaoDisponibilidade
+    +{static} reconstituir(id: Long, servicoId: Long, usuarioId: Long, status: StatusDisponibilidade, vagas: Integer, origem: OrigemAtualizacao, dataHora: LocalDateTime) : AtualizacaoDisponibilidade
+    +corrigir(servico: Servico, usuarioId: Long, status: StatusDisponibilidade, vagas: Integer, origem: OrigemAtualizacao, dataHora: LocalDateTime) : void
+    +ehAnteriorA(instante: LocalDateTime) : boolean
+  }
+  class ConsultaTotem {
+    +{static} TAMANHO_CODIGO : int
+    -id : Long
+    -totemId : Long
+    -tipoServicoId : Integer
+    -perfilId : Integer
+    -servicoEscolhidoId : Long
+    -dataConsulta : LocalDateTime
+    -imprimiuRota : boolean
+    -pediuAbordagem : boolean
+    -codigoChegada : String
+    -dataChegada : LocalDateTime
+    +{static} registrar(totemId: Long, tipoServicoId: Integer, perfilId: Integer, servicoEscolhidoId: Long, dataConsulta: LocalDateTime, imprimiuRota: boolean, pediuAbordagem: boolean, codigoGerado: String) : ConsultaTotem
+    +{static} reconstituir(id: Long, totemId: Long, tipoServicoId: Integer, perfilId: Integer, servicoEscolhidoId: Long, dataConsulta: LocalDateTime, imprimiuRota: boolean, pediuAbordagem: boolean, codigoChegada: String, dataChegada: LocalDateTime) : ConsultaTotem
+    +atualizar(totemId: Long, tipoServicoId: Integer, perfilId: Integer, servicoEscolhidoId: Long, imprimiuRota: boolean, pediuAbordagem: boolean, codigoGerado: String) : void
+    +registrarChegada(instante: LocalDateTime) : void
+    +chegadaRegistrada() : boolean
+  }
+  class GradeHorario <<record>> {
+    -funciona24h : boolean
+    -horarios : List<Horario>
+    +estaAbertoEm(instante: LocalDateTime) : boolean
+    +faixaAtual(instante: LocalDateTime) : Optional<Horario>
+    +proximaAberturaNoDia(instante: LocalDateTime) : Optional<Horario>
+  }
+  class Horario {
+    +{static} FIM_DO_DIA : LocalTime
+    -id : Long
+    -servicoId : Long
+    -diaSemana : int
+    -abertura : LocalTime
+    -fechamento : LocalTime
+    +{static} novo(servicoId: Long, diaSemana: Integer, abertura: LocalTime, fechamento: LocalTime) : Horario
+    +{static} reconstituir(id: Long, servicoId: Long, diaSemana: int, abertura: LocalTime, fechamento: LocalTime) : Horario
+    +atualizar(diaSemana: Integer, abertura: LocalTime, fechamento: LocalTime) : void
+    +{static} diaSemanaDe(dia: DayOfWeek) : int
+    +{static} nomeDoDia(diaSemana: int) : String
+    +abrangeInstante(instante: LocalDateTime) : boolean
+  }
+  class Organizacao {
+    -id : Long
+    -nome : String
+    -tipo : TipoOrganizacao
+    -telefone : String
+    -email : String
+    +{static} nova(nome: String, tipo: TipoOrganizacao, telefone: String, email: String) : Organizacao
+    +{static} reconstituir(id: Long, nome: String, tipo: TipoOrganizacao, telefone: String, email: String) : Organizacao
+    +atualizar(nome: String, tipo: TipoOrganizacao, telefone: String, email: String) : void
+  }
+  enum OrigemAtualizacao {
+    PAINEL
+    CENTRAL_VAGAS
+  }
+  enum PerfilAcesso {
+    GESTOR
+    EQUIPE
+    COOPERATIVA
+  }
+  class PerfilAtendido {
+    -id : Integer
+    -descricao : String
+    +{static} novo(descricao: String) : PerfilAtendido
+    +{static} reconstituir(id: Integer, descricao: String) : PerfilAtendido
+    +atualizar(descricao: String) : void
+    +temDescricao(outra: String) : boolean
+  }
+  class Servico {
+    +{static} CAPACIDADE_MAXIMA : int
+    -id : Long
+    -organizacaoId : Long
+    -tipo : TipoServico
+    -nome : String
+    -endereco : Endereco
+    -coordenada : Coordenada
+    -capacidade : Integer
+    -funciona24h : boolean
+    -statusAprovacao : StatusAprovacao
+    -dataCadastro : LocalDateTime
+    -perfis : Set<PerfilAtendido>
+    +{static} novo(organizacaoId: Long, tipo: TipoServico, nome: String, endereco: Endereco, coordenada: Coordenada, capacidade: Integer, funciona24h: boolean, statusAprovacao: StatusAprovacao, dataCadastro: LocalDateTime, perfis: Set<PerfilAtendido>) : Servico
+    +{static} reconstituir(id: Long, organizacaoId: Long, tipo: TipoServico, nome: String, endereco: Endereco, coordenada: Coordenada, capacidade: Integer, funciona24h: boolean, statusAprovacao: StatusAprovacao, dataCadastro: LocalDateTime, perfis: Set<PerfilAtendido>) : Servico
+    +atualizar(organizacaoId: Long, tipo: TipoServico, nome: String, endereco: Endereco, coordenada: Coordenada, capacidade: Integer, funciona24h: boolean, statusAprovacao: StatusAprovacao, perfis: Set<PerfilAtendido>) : void
+    +ehAbrigo() : boolean
+    +estaAprovado() : boolean
+    +atendePerfil(perfil: PerfilAtendido) : boolean
+    +getPerfis() : Set<PerfilAtendido>
+  }
+  enum SituacaoServico {
+    ABERTO
+    FILA_GRANDE
+    LOTADO
+    FECHADO
+  }
+  enum StatusAprovacao {
+    PENDENTE
+    APROVADO
+    REPROVADO
+  }
+  enum StatusDisponibilidade {
+    TEM_VAGA
+    POUCAS_VAGAS
+    ABERTO
+    FILA_GRANDE
+    LOTADO
+    FECHADO
+    SEM_ATUALIZACAO_RECENTE
+    -grupoOrdenacao : int
+    -exigeVagas : boolean
+    +getGrupoOrdenacao() : int
+    +exigeVagas() : boolean
+    +{static} de(situacao: SituacaoServico) : StatusDisponibilidade
+  }
+  enum StatusTotem {
+    ONLINE
+    OFFLINE
+    MANUTENCAO
+  }
+  enum TipoOrganizacao {
+    CENTRO_POP
+    ONG
+    COOPERATIVA
+    PREFEITURA
+    PARCEIRO
+  }
+  class TipoServico {
+    +{static} NOME_ABRIGO : String
+    -id : Integer
+    -nome : String
+    -icone : String
+    +{static} novo(nome: String, icone: String) : TipoServico
+    +{static} reconstituir(id: Integer, nome: String, icone: String) : TipoServico
+    +atualizar(nome: String, icone: String) : void
+    +ehAbrigo() : boolean
+    +temNome(outro: String) : boolean
+    +{static} normalizar(texto: String) : String
+  }
+  class Totem {
+    -id : Long
+    -codigo : String
+    -endereco : Endereco
+    -coordenada : Coordenada
+    -status : StatusTotem
+    -papelImpressora : boolean
+    -dataInstalacao : LocalDate
+    -ultimaSincronizacao : LocalDateTime
+    +{static} novo(codigo: String, endereco: Endereco, coordenada: Coordenada, status: StatusTotem, papelImpressora: boolean, dataInstalacao: LocalDate, ultimaSincronizacao: LocalDateTime) : Totem
+    +{static} reconstituir(id: Long, codigo: String, endereco: Endereco, coordenada: Coordenada, status: StatusTotem, papelImpressora: boolean, dataInstalacao: LocalDate, ultimaSincronizacao: LocalDateTime) : Totem
+    +atualizar(codigo: String, endereco: Endereco, coordenada: Coordenada, status: StatusTotem, papelImpressora: boolean, dataInstalacao: LocalDate, ultimaSincronizacao: LocalDateTime) : void
+    +garantirDisponivelParaConsulta() : void
+  }
+  class UsuarioPainel {
+    -id : Long
+    -organizacaoId : Long
+    -nome : String
+    -email : String
+    -perfilAcesso : PerfilAcesso
+    -ativo : boolean
+    +{static} novo(organizacaoId: Long, nome: String, email: String, perfilAcesso: PerfilAcesso, ativo: boolean) : UsuarioPainel
+    +{static} reconstituir(id: Long, organizacaoId: Long, nome: String, email: String, perfilAcesso: PerfilAcesso, ativo: boolean) : UsuarioPainel
+    +atualizar(organizacaoId: Long, nome: String, email: String, perfilAcesso: PerfilAcesso, ativo: boolean) : void
+    +garantirPodeAtualizar(servico: Servico) : void
+  }
+  class Validacoes {
+    +{static} textoObrigatorio(valor: String, campo: String, tamanhoMaximo: int) : String
+    +{static} textoOpcional(valor: String, campo: String, tamanhoMaximo: int) : String
+    +{static} emailOpcional(valor: String, campo: String) : String
+    +{static} obrigatorio(valor: T, mensagem: String) : T
+  }
+}
+package "br.com.fiap.civia.domain.valueobject" {
+  class Coordenada <<record>> {
+    -latitude : double
+    -longitude : double
+    +{static} de(latitude: Double, longitude: Double) : Coordenada
+    +distanciaEmMetrosAte(destino: Coordenada) : double
+  }
+  class Endereco <<record>> {
+    -logradouro : String
+    -numero : String
+    -bairro : String
+    +formatado() : String
+  }
+}
+package "br.com.fiap.civia.infrastructure.converter" {
+  class HoraConverter <<Converter>> {
+    +convertToDatabaseColumn(hora: LocalTime) : String
+    +convertToEntityAttribute(valor: String) : LocalTime
+  }
+  class SimNaoConverter <<Converter>> {
+    +convertToDatabaseColumn(valor: Boolean) : String
+    +convertToEntityAttribute(valor: String) : Boolean
+  }
+}
+package "br.com.fiap.civia.infrastructure.dao" {
+  class AtualizacaoDisponibilidadeDAOImpl <<Repository>> {
+    -jpa : AtualizacaoDisponibilidadeJpaRepository
+    +salvar(atualizacao: AtualizacaoDisponibilidade) : AtualizacaoDisponibilidade
+    +buscarPorId(id: Long) : Optional<AtualizacaoDisponibilidade>
+    +listar(servicoId: Long) : List<AtualizacaoDisponibilidade>
+    +buscarMaisRecentesPorServicos(servicoIds: Collection<Long>) : Map<Long, AtualizacaoDisponibilidade>
+    +existePorUsuario(usuarioId: Long) : boolean
+    +excluir(id: Long) : void
+    +excluirPorServico(servicoId: Long) : void
+  }
+  class ConsultaTotemDAOImpl <<Repository>> {
+    -jpa : ConsultaTotemJpaRepository
+    +salvar(consulta: ConsultaTotem) : ConsultaTotem
+    +buscarPorId(id: Long) : Optional<ConsultaTotem>
+    +buscarPorCodigoChegada(codigo: String) : Optional<ConsultaTotem>
+    +listar(totemId: Long) : List<ConsultaTotem>
+    +existePorCodigoChegada(codigo: String) : boolean
+    +existePorTotem(totemId: Long) : boolean
+    +existePorServico(servicoId: Long) : boolean
+    +existePorTipo(tipoServicoId: Integer) : boolean
+    +existePorPerfil(perfilId: Integer) : boolean
+    +excluir(id: Long) : void
+  }
+  class HorarioDAOImpl <<Repository>> {
+    -jpa : HorarioJpaRepository
+    +salvar(horario: Horario) : Horario
+    +buscarPorId(id: Long) : Optional<Horario>
+    +listarPorServico(servicoId: Long) : List<Horario>
+    +listarPorServicos(servicoIds: Collection<Long>) : Map<Long, List<Horario>>
+    +existe(servicoId: Long, diaSemana: int, abertura: LocalTime, idIgnorado: Long) : boolean
+    +excluir(id: Long) : void
+    +excluirPorServico(servicoId: Long) : void
+  }
+  class OrganizacaoDAOImpl <<Repository>> {
+    -jpa : OrganizacaoJpaRepository
+    +salvar(organizacao: Organizacao) : Organizacao
+    +buscarPorId(id: Long) : Optional<Organizacao>
+    +listar(tipo: TipoOrganizacao) : List<Organizacao>
+    +existePorId(id: Long) : boolean
+    +existePorNome(nome: String, idIgnorado: Long) : boolean
+    +excluir(id: Long) : void
+  }
+  class PerfilAtendidoDAOImpl <<Repository>> {
+    -jpa : PerfilAtendidoJpaRepository
+    +salvar(perfil: PerfilAtendido) : PerfilAtendido
+    +buscarPorId(id: Integer) : Optional<PerfilAtendido>
+    +buscarPorIds(ids: Collection<Integer>) : List<PerfilAtendido>
+    +listar() : List<PerfilAtendido>
+    +existePorDescricao(descricao: String, idIgnorado: Integer) : boolean
+    +contar() : long
+    +excluir(id: Integer) : void
+  }
+  class ServicoDAOImpl <<Repository>> {
+    -jpa : ServicoJpaRepository
+    -tipoJpa : TipoServicoJpaRepository
+    -perfilJpa : PerfilAtendidoJpaRepository
+    +salvar(servico: Servico) : Servico
+    +buscarPorId(id: Long) : Optional<Servico>
+    +listar(tipoServicoId: Integer, statusAprovacao: StatusAprovacao, organizacaoId: Long) : List<Servico>
+    +existePorId(id: Long) : boolean
+    +existePorOrganizacao(organizacaoId: Long) : boolean
+    +existePorTipo(tipoServicoId: Integer) : boolean
+    +existePorPerfil(perfilId: Integer) : boolean
+    +excluir(id: Long) : void
+  }
+  class TipoServicoDAOImpl <<Repository>> {
+    -jpa : TipoServicoJpaRepository
+    +salvar(tipo: TipoServico) : TipoServico
+    +buscarPorId(id: Integer) : Optional<TipoServico>
+    +listar() : List<TipoServico>
+    +existePorNome(nome: String, idIgnorado: Integer) : boolean
+    +contar() : long
+    +excluir(id: Integer) : void
+  }
+  class TotemDAOImpl <<Repository>> {
+    -jpa : TotemJpaRepository
+    +salvar(totem: Totem) : Totem
+    +buscarPorId(id: Long) : Optional<Totem>
+    +listar() : List<Totem>
+    +existePorCodigo(codigo: String, idIgnorado: Long) : boolean
+    +excluir(id: Long) : void
+  }
+  class UsuarioPainelDAOImpl <<Repository>> {
+    -jpa : UsuarioPainelJpaRepository
+    +salvar(usuario: UsuarioPainel) : UsuarioPainel
+    +buscarPorId(id: Long) : Optional<UsuarioPainel>
+    +listar(organizacaoId: Long) : List<UsuarioPainel>
+    +existePorEmail(email: String, idIgnorado: Long) : boolean
+    +existePorOrganizacao(organizacaoId: Long) : boolean
+    +excluir(id: Long) : void
+  }
+}
+package "br.com.fiap.civia.infrastructure.entity" {
+  class AtualizacaoDisponibilidadeEntity <<Entity>> {
+    -id : Long
+    -servicoId : Long
+    -usuarioId : Long
+    -status : StatusDisponibilidade
+    -vagas : Integer
+    -origem : OrigemAtualizacao
+    -dataHora : LocalDateTime
+  }
+  class ConsultaTotemEntity <<Entity>> {
+    -id : Long
+    -totemId : Long
+    -tipoServicoId : Integer
+    -perfilId : Integer
+    -servicoEscolhidoId : Long
+    -dataConsulta : LocalDateTime
+    -imprimiuRota : Boolean
+    -pediuAbordagem : Boolean
+    -codigoChegada : String
+    -dataChegada : LocalDateTime
+  }
+  class HorarioEntity <<Entity>> {
+    -id : Long
+    -servicoId : Long
+    -diaSemana : Integer
+    -abertura : LocalTime
+    -fechamento : LocalTime
+  }
+  class OrganizacaoEntity <<Entity>> {
+    -id : Long
+    -nome : String
+    -tipo : TipoOrganizacao
+    -telefone : String
+    -email : String
+  }
+  class PerfilAtendidoEntity <<Entity>> {
+    -id : Integer
+    -descricao : String
+  }
+  class ServicoEntity <<Entity>> {
+    -id : Long
+    -organizacaoId : Long
+    -tipo : TipoServicoEntity
+    -nome : String
+    -logradouro : String
+    -numero : String
+    -bairro : String
+    -latitude : BigDecimal
+    -longitude : BigDecimal
+    -capacidade : Integer
+    -funciona24h : Boolean
+    -statusAprovacao : StatusAprovacao
+    -dataCadastro : LocalDateTime
+    -perfis : Set<PerfilAtendidoEntity>
+  }
+  class TipoServicoEntity <<Entity>> {
+    -id : Integer
+    -nome : String
+    -icone : String
+  }
+  class TotemEntity <<Entity>> {
+    -id : Long
+    -codigo : String
+    -logradouro : String
+    -bairro : String
+    -latitude : BigDecimal
+    -longitude : BigDecimal
+    -status : StatusTotem
+    -papelImpressora : Boolean
+    -dataInstalacao : LocalDate
+    -ultimaSincronizacao : LocalDateTime
+  }
+  class UsuarioPainelEntity <<Entity>> {
+    -id : Long
+    -organizacaoId : Long
+    -nome : String
+    -email : String
+    -perfilAcesso : PerfilAcesso
+    -ativo : Boolean
+  }
+}
+package "br.com.fiap.civia.infrastructure.jpa" {
+  interface AtualizacaoDisponibilidadeJpaRepository {
+    +findAllByOrderByDataHoraDescIdDesc() : List<AtualizacaoDisponibilidadeEntity>
+    +findByServicoIdOrderByDataHoraDescIdDesc(servicoId: Long) : List<AtualizacaoDisponibilidadeEntity>
+    +findMaisRecentesPorServicos(servicoIds: Collection<Long>) : List<AtualizacaoDisponibilidadeEntity>
+    +existsByUsuarioId(usuarioId: Long) : boolean
+    +excluirPorServico(servicoId: Long) : void
+  }
+  interface ConsultaTotemJpaRepository {
+    +findAllByOrderByDataConsultaDescIdDesc() : List<ConsultaTotemEntity>
+    +findByTotemIdOrderByDataConsultaDescIdDesc(totemId: Long) : List<ConsultaTotemEntity>
+    +findByCodigoChegada(codigoChegada: String) : Optional<ConsultaTotemEntity>
+    +existsByCodigoChegada(codigoChegada: String) : boolean
+    +existsByTotemId(totemId: Long) : boolean
+    +existsByServicoEscolhidoId(servicoId: Long) : boolean
+    +existsByTipoServicoId(tipoServicoId: Integer) : boolean
+    +existsByPerfilId(perfilId: Integer) : boolean
+  }
+  interface HorarioJpaRepository {
+    +findByServicoIdOrderByDiaSemanaAscAberturaAsc(servicoId: Long) : List<HorarioEntity>
+    +findByServicoIdIn(servicoIds: Collection<Long>) : List<HorarioEntity>
+    +existsByServicoIdAndDiaSemanaAndAbertura(servicoId: Long, diaSemana: Integer, abertura: LocalTime) : boolean
+    +existsByServicoIdAndDiaSemanaAndAberturaAndIdNot(servicoId: Long, diaSemana: Integer, abertura: LocalTime, id: Long) : boolean
+    +excluirPorServico(servicoId: Long) : void
+  }
+  interface OrganizacaoJpaRepository {
+    +findAllByOrderByIdAsc() : List<OrganizacaoEntity>
+    +findByTipoOrderByIdAsc(tipo: TipoOrganizacao) : List<OrganizacaoEntity>
+    +existsByNomeIgnoreCase(nome: String) : boolean
+    +existsByNomeIgnoreCaseAndIdNot(nome: String, id: Long) : boolean
+  }
+  interface PerfilAtendidoJpaRepository {
+    +findAllByOrderByIdAsc() : List<PerfilAtendidoEntity>
+    +existsByDescricaoIgnoreCase(descricao: String) : boolean
+    +existsByDescricaoIgnoreCaseAndIdNot(descricao: String, id: Integer) : boolean
+  }
+  interface ServicoJpaRepository {
+    +filtrar(tipoId: Integer, status: StatusAprovacao, organizacaoId: Long) : List<ServicoEntity>
+    +existsByOrganizacaoId(organizacaoId: Long) : boolean
+    +existsByTipoId(tipoId: Integer) : boolean
+    +existsByPerfisId(perfilId: Integer) : boolean
+  }
+  interface TipoServicoJpaRepository {
+    +findAllByOrderByIdAsc() : List<TipoServicoEntity>
+    +existsByNomeIgnoreCase(nome: String) : boolean
+    +existsByNomeIgnoreCaseAndIdNot(nome: String, id: Integer) : boolean
+  }
+  interface TotemJpaRepository {
+    +findAllByOrderByIdAsc() : List<TotemEntity>
+    +existsByCodigoIgnoreCase(codigo: String) : boolean
+    +existsByCodigoIgnoreCaseAndIdNot(codigo: String, id: Long) : boolean
+  }
+  interface UsuarioPainelJpaRepository {
+    +findAllByOrderByIdAsc() : List<UsuarioPainelEntity>
+    +findByOrganizacaoIdOrderByIdAsc(organizacaoId: Long) : List<UsuarioPainelEntity>
+    +existsByEmailIgnoreCase(email: String) : boolean
+    +existsByEmailIgnoreCaseAndIdNot(email: String, id: Long) : boolean
+    +existsByOrganizacaoId(organizacaoId: Long) : boolean
+  }
+}
+package "br.com.fiap.civia.infrastructure.mapper" {
+  class CoordenadaMapper {
+    +{static} paraDecimal(grau: double) : BigDecimal
+    +{static} paraDominio(latitude: BigDecimal, longitude: BigDecimal) : Coordenada
+  }
+  class OperacaoPersistenceMapper {
+    +{static} paraDominio(e: HorarioEntity) : Horario
+    +{static} copiar(h: Horario, e: HorarioEntity) : void
+    +{static} paraDominio(e: UsuarioPainelEntity) : UsuarioPainel
+    +{static} copiar(u: UsuarioPainel, e: UsuarioPainelEntity) : void
+    +{static} paraDominio(e: AtualizacaoDisponibilidadeEntity) : AtualizacaoDisponibilidade
+    +{static} copiar(a: AtualizacaoDisponibilidade, e: AtualizacaoDisponibilidadeEntity) : void
+    +{static} paraDominio(e: TotemEntity) : Totem
+    +{static} copiar(t: Totem, e: TotemEntity) : void
+    +{static} paraDominio(e: ConsultaTotemEntity) : ConsultaTotem
+    +{static} copiar(c: ConsultaTotem, e: ConsultaTotemEntity) : void
+  }
+  class ReferenciaPersistenceMapper {
+    +{static} paraDominio(e: OrganizacaoEntity) : Organizacao
+    +{static} copiar(o: Organizacao, e: OrganizacaoEntity) : void
+    +{static} paraDominio(e: TipoServicoEntity) : TipoServico
+    +{static} copiar(t: TipoServico, e: TipoServicoEntity) : void
+    +{static} paraDominio(e: PerfilAtendidoEntity) : PerfilAtendido
+    +{static} copiar(p: PerfilAtendido, e: PerfilAtendidoEntity) : void
+  }
+  class ServicoPersistenceMapper {
+    +{static} paraDominio(e: ServicoEntity) : Servico
+    +{static} copiar(s: Servico, e: ServicoEntity) : void
+  }
+}
+package "br.com.fiap.civia.presentation.config" {
+  class ClockConfig <<Configuration>> {
+    +clock() : Clock
+  }
+  class DataInitializer <<Component>> {
+    -cargaInicialBO : CargaInicialBO
+    +run(args: String...) : void
+  }
+}
+package "br.com.fiap.civia.presentation.controller" {
+  class AtualizacaoDisponibilidadeController <<RestController>> {
+    -atualizacaoDisponibilidadeBO : AtualizacaoDisponibilidadeBO
+    +listar(servicoId: Long) : ResponseEntity<List<AtualizacaoDisponibilidadeResponse>>
+    +buscar(id: Long) : ResponseEntity<AtualizacaoDisponibilidadeResponse>
+    +cadastrar(request: AtualizacaoDisponibilidadeRequest) : ResponseEntity<AtualizacaoDisponibilidadeResponse>
+    +atualizar(id: Long, request: AtualizacaoDisponibilidadeRequest) : ResponseEntity<AtualizacaoDisponibilidadeResponse>
+    +excluir(id: Long) : ResponseEntity<Void>
+  }
+  class ConsultaTotemController <<RestController>> {
+    -consultaTotemBO : ConsultaTotemBO
+    +listar(totemId: Long) : ResponseEntity<List<ConsultaTotemResponse>>
+    +buscar(id: Long) : ResponseEntity<ConsultaTotemResponse>
+    +cadastrar(request: ConsultaTotemRequest) : ResponseEntity<ConsultaTotemResponse>
+    +atualizar(id: Long, request: ConsultaTotemRequest) : ResponseEntity<ConsultaTotemResponse>
+    +registrarChegada(codigo: String) : ResponseEntity<ConsultaTotemResponse>
+    +excluir(id: Long) : ResponseEntity<Void>
+  }
+  class HorarioController <<RestController>> {
+    -horarioBO : HorarioBO
+    +listar(servicoId: Long) : ResponseEntity<List<HorarioResponse>>
+    +buscar(servicoId: Long, id: Long) : ResponseEntity<HorarioResponse>
+    +cadastrar(servicoId: Long, request: HorarioRequest) : ResponseEntity<HorarioResponse>
+    +atualizar(servicoId: Long, id: Long, request: HorarioRequest) : ResponseEntity<HorarioResponse>
+    +excluir(servicoId: Long, id: Long) : ResponseEntity<Void>
+  }
+  class OrganizacaoController <<RestController>> {
+    -organizacaoBO : OrganizacaoBO
+    +listar(tipo: String) : ResponseEntity<List<OrganizacaoResponse>>
+    +buscar(id: Long) : ResponseEntity<OrganizacaoResponse>
+    +cadastrar(request: OrganizacaoRequest) : ResponseEntity<OrganizacaoResponse>
+    +atualizar(id: Long, request: OrganizacaoRequest) : ResponseEntity<OrganizacaoResponse>
+    +excluir(id: Long) : ResponseEntity<Void>
+  }
+  class PerfilAtendidoController <<RestController>> {
+    -perfilAtendidoBO : PerfilAtendidoBO
+    +listar() : ResponseEntity<List<PerfilAtendidoResponse>>
+    +buscar(id: Integer) : ResponseEntity<PerfilAtendidoResponse>
+    +cadastrar(request: PerfilAtendidoRequest) : ResponseEntity<PerfilAtendidoResponse>
+    +atualizar(id: Integer, request: PerfilAtendidoRequest) : ResponseEntity<PerfilAtendidoResponse>
+    +excluir(id: Integer) : ResponseEntity<Void>
+  }
+  class ServicoController <<RestController>> {
+    -servicoBO : ServicoBO
+    +listar(tipoServicoId: Integer, statusAprovacao: String, organizacaoId: Long) : ResponseEntity<List<ServicoResponse>>
+    +buscar(id: Long) : ResponseEntity<ServicoResponse>
+    +cadastrar(request: ServicoRequest) : ResponseEntity<ServicoResponse>
+    +atualizar(id: Long, request: ServicoRequest) : ResponseEntity<ServicoResponse>
+    +excluir(id: Long) : ResponseEntity<Void>
+  }
+  class TipoServicoController <<RestController>> {
+    -tipoServicoBO : TipoServicoBO
+    +listar() : ResponseEntity<List<TipoServicoResponse>>
+    +buscar(id: Integer) : ResponseEntity<TipoServicoResponse>
+    +cadastrar(request: TipoServicoRequest) : ResponseEntity<TipoServicoResponse>
+    +atualizar(id: Integer, request: TipoServicoRequest) : ResponseEntity<TipoServicoResponse>
+    +excluir(id: Integer) : ResponseEntity<Void>
+  }
+  class TotemController <<RestController>> {
+    -totemBO : TotemBO
+    -mapaServicosBO : MapaServicosBO
+    +consultarServicos(id: Long, tipo: String, perfil: String) : ResponseEntity<MapaServicosResponse>
+    +listar() : ResponseEntity<List<TotemResponse>>
+    +buscar(id: Long) : ResponseEntity<TotemResponse>
+    +cadastrar(request: TotemRequest) : ResponseEntity<TotemResponse>
+    +atualizar(id: Long, request: TotemRequest) : ResponseEntity<TotemResponse>
+    +excluir(id: Long) : ResponseEntity<Void>
+  }
+  class UsuarioPainelController <<RestController>> {
+    -usuarioPainelBO : UsuarioPainelBO
+    +listar(organizacaoId: Long) : ResponseEntity<List<UsuarioPainelResponse>>
+    +buscar(id: Long) : ResponseEntity<UsuarioPainelResponse>
+    +cadastrar(request: UsuarioPainelRequest) : ResponseEntity<UsuarioPainelResponse>
+    +atualizar(id: Long, request: UsuarioPainelRequest) : ResponseEntity<UsuarioPainelResponse>
+    +excluir(id: Long) : ResponseEntity<Void>
+  }
+}
+package "br.com.fiap.civia.presentation.handler" {
+  class GlobalExceptionHandler <<RestControllerAdvice>> {
+    +tratarValidacao(ex: MethodArgumentNotValidException, request: HttpServletRequest) : ResponseEntity<ProblemDetail>
+    +tratarDadosInvalidos(ex: DadosInvalidosException, request: HttpServletRequest) : ResponseEntity<ProblemDetail>
+    +tratarValidacaoParametros(ex: HandlerMethodValidationException, request: HttpServletRequest) : ResponseEntity<ProblemDetail>
+    +tratarCorpoIlegivel(ex: HttpMessageNotReadableException, request: HttpServletRequest) : ResponseEntity<ProblemDetail>
+    +tratarTipoParametro(ex: MethodArgumentTypeMismatchException, request: HttpServletRequest) : ResponseEntity<ProblemDetail>
+    +tratarParametroAusente(ex: MissingServletRequestParameterException, request: HttpServletRequest) : ResponseEntity<ProblemDetail>
+    +tratarNaoEncontrado(ex: RecursoNaoEncontradoException, request: HttpServletRequest) : ResponseEntity<ProblemDetail>
+    +tratarConflito(ex: ConflitoException, request: HttpServletRequest) : ResponseEntity<ProblemDetail>
+    +tratarIntegridade(ex: DataIntegrityViolationException, request: HttpServletRequest) : ResponseEntity<ProblemDetail>
+    +tratarRegraNegocio(ex: RegraNegocioException, request: HttpServletRequest) : ResponseEntity<ProblemDetail>
+    +tratarRotaInexistente(ex: NoResourceFoundException, request: HttpServletRequest) : ResponseEntity<ProblemDetail>
+    +tratarMetodoNaoSuportado(ex: HttpRequestMethodNotSupportedException, request: HttpServletRequest) : ResponseEntity<ProblemDetail>
+    +tratarMidiaNaoSuportada(ex: HttpMediaTypeNotSupportedException, request: HttpServletRequest) : ResponseEntity<ProblemDetail>
+    +tratarErroInesperado(ex: Exception, request: HttpServletRequest) : ResponseEntity<ProblemDetail>
+  }
+}
+AtualizacaoDisponibilidade --> "1" OrigemAtualizacao
+AtualizacaoDisponibilidade --> "1" StatusDisponibilidade
+AtualizacaoDisponibilidadeBO ..> AtualizacaoDisponibilidadeDAO
+AtualizacaoDisponibilidadeBO ..> ServicoDAO
+AtualizacaoDisponibilidadeBO ..> UsuarioPainelDAO
+AtualizacaoDisponibilidadeController ..> AtualizacaoDisponibilidadeBO
+AtualizacaoDisponibilidadeDAO <|.. AtualizacaoDisponibilidadeDAOImpl
+AtualizacaoDisponibilidadeDAOImpl ..> AtualizacaoDisponibilidadeJpaRepository
+CargaInicialBO ..> PerfilAtendidoDAO
+CargaInicialBO ..> TipoServicoDAO
+ConsultaTotemBO ..> ConsultaTotemDAO
+ConsultaTotemBO ..> PerfilAtendidoDAO
+ConsultaTotemBO ..> ServicoDAO
+ConsultaTotemBO ..> TipoServicoDAO
+ConsultaTotemBO ..> TotemDAO
+ConsultaTotemController ..> ConsultaTotemBO
+ConsultaTotemDAO <|.. ConsultaTotemDAOImpl
+ConsultaTotemDAOImpl ..> ConsultaTotemJpaRepository
+DataInitializer ..> CargaInicialBO
+Disponibilidade --> "1" StatusDisponibilidade
+DomainException <|-- DadoInvalidoException
+DomainException <|-- RegraNegocioVioladaException
+GradeHorario --> "*" Horario
+HorarioBO ..> HorarioDAO
+HorarioBO ..> ServicoDAO
+HorarioController ..> HorarioBO
+HorarioDAO <|.. HorarioDAOImpl
+HorarioDAOImpl ..> HorarioJpaRepository
+MapaServicosBO ..> AtualizacaoDisponibilidadeDAO
+MapaServicosBO ..> DisponibilidadeBO
+MapaServicosBO ..> HorarioDAO
+MapaServicosBO ..> PerfilAtendidoDAO
+MapaServicosBO ..> ServicoDAO
+MapaServicosBO ..> TipoServicoDAO
+MapaServicosBO ..> TotemDAO
+MapaServicosResponse --> "*" ServicoProximoResponse
+Organizacao --> "1" TipoOrganizacao
+OrganizacaoBO ..> OrganizacaoDAO
+OrganizacaoBO ..> ServicoDAO
+OrganizacaoBO ..> UsuarioPainelDAO
+OrganizacaoController ..> OrganizacaoBO
+OrganizacaoDAO <|.. OrganizacaoDAOImpl
+OrganizacaoDAOImpl ..> OrganizacaoJpaRepository
+PerfilAtendidoBO ..> ConsultaTotemDAO
+PerfilAtendidoBO ..> PerfilAtendidoDAO
+PerfilAtendidoBO ..> ServicoDAO
+PerfilAtendidoController ..> PerfilAtendidoBO
+PerfilAtendidoDAO <|.. PerfilAtendidoDAOImpl
+PerfilAtendidoDAOImpl ..> PerfilAtendidoJpaRepository
+Servico --> "*" PerfilAtendido
+Servico --> "1" Coordenada
+Servico --> "1" Endereco
+Servico --> "1" StatusAprovacao
+Servico --> "1" TipoServico
+ServicoBO ..> AtualizacaoDisponibilidadeDAO
+ServicoBO ..> ConsultaTotemDAO
+ServicoBO ..> HorarioDAO
+ServicoBO ..> OrganizacaoDAO
+ServicoBO ..> PerfilAtendidoDAO
+ServicoBO ..> ServicoDAO
+ServicoBO ..> TipoServicoDAO
+ServicoController ..> ServicoBO
+ServicoDAO <|.. ServicoDAOImpl
+ServicoDAOImpl ..> PerfilAtendidoJpaRepository
+ServicoDAOImpl ..> ServicoJpaRepository
+ServicoDAOImpl ..> TipoServicoJpaRepository
+ServicoResponse --> "*" PerfilAtendidoResponse
+ServicoResponse --> "1" TipoServicoResponse
+TipoServicoBO ..> ConsultaTotemDAO
+TipoServicoBO ..> ServicoDAO
+TipoServicoBO ..> TipoServicoDAO
+TipoServicoController ..> TipoServicoBO
+TipoServicoDAO <|.. TipoServicoDAOImpl
+TipoServicoDAOImpl ..> TipoServicoJpaRepository
+Totem --> "1" Coordenada
+Totem --> "1" Endereco
+Totem --> "1" StatusTotem
+TotemBO ..> ConsultaTotemDAO
+TotemBO ..> TotemDAO
+TotemController ..> MapaServicosBO
+TotemController ..> TotemBO
+TotemDAO <|.. TotemDAOImpl
+TotemDAOImpl ..> TotemJpaRepository
+UsuarioPainel --> "1" PerfilAcesso
+UsuarioPainelBO ..> AtualizacaoDisponibilidadeDAO
+UsuarioPainelBO ..> OrganizacaoDAO
+UsuarioPainelBO ..> UsuarioPainelDAO
+UsuarioPainelController ..> UsuarioPainelBO
+UsuarioPainelDAO <|.. UsuarioPainelDAOImpl
+UsuarioPainelDAOImpl ..> UsuarioPainelJpaRepository
+@enduml

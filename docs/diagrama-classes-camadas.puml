@@ -1,0 +1,191 @@
+@startuml
+title CIVIA - Camadas: Controller -> BO -> DAO (interface) <- DAOImpl -> JPA
+' Gerado a partir do codigo-fonte Java (pasta civia-*/src/main/java).
+!pragma layout smetana
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam packageStyle rectangle
+hide empty members
+left to right direction
+package "br.com.fiap.civia.application.bo" {
+  class AtualizacaoDisponibilidadeBO <<Service>> {
+  }
+  class CargaInicialBO <<Service>> {
+  }
+  class ConsultaTotemBO <<Service>> {
+  }
+  class DisponibilidadeBO <<Component>> {
+  }
+  class HorarioBO <<Service>> {
+  }
+  class MapaServicosBO <<Service>> {
+  }
+  class OrganizacaoBO <<Service>> {
+  }
+  class PerfilAtendidoBO <<Service>> {
+  }
+  class ServicoBO <<Service>> {
+  }
+  class TipoServicoBO <<Service>> {
+  }
+  class TotemBO <<Service>> {
+  }
+  class UsuarioPainelBO <<Service>> {
+  }
+}
+package "br.com.fiap.civia.domain.dao" {
+  interface AtualizacaoDisponibilidadeDAO {
+  }
+  interface ConsultaTotemDAO {
+  }
+  interface HorarioDAO {
+  }
+  interface OrganizacaoDAO {
+  }
+  interface PerfilAtendidoDAO {
+  }
+  interface ServicoDAO {
+  }
+  interface TipoServicoDAO {
+  }
+  interface TotemDAO {
+  }
+  interface UsuarioPainelDAO {
+  }
+}
+package "br.com.fiap.civia.infrastructure.dao" {
+  class AtualizacaoDisponibilidadeDAOImpl <<Repository>> {
+  }
+  class ConsultaTotemDAOImpl <<Repository>> {
+  }
+  class HorarioDAOImpl <<Repository>> {
+  }
+  class OrganizacaoDAOImpl <<Repository>> {
+  }
+  class PerfilAtendidoDAOImpl <<Repository>> {
+  }
+  class ServicoDAOImpl <<Repository>> {
+  }
+  class TipoServicoDAOImpl <<Repository>> {
+  }
+  class TotemDAOImpl <<Repository>> {
+  }
+  class UsuarioPainelDAOImpl <<Repository>> {
+  }
+}
+package "br.com.fiap.civia.infrastructure.jpa" {
+  interface AtualizacaoDisponibilidadeJpaRepository {
+  }
+  interface ConsultaTotemJpaRepository {
+  }
+  interface HorarioJpaRepository {
+  }
+  interface OrganizacaoJpaRepository {
+  }
+  interface PerfilAtendidoJpaRepository {
+  }
+  interface ServicoJpaRepository {
+  }
+  interface TipoServicoJpaRepository {
+  }
+  interface TotemJpaRepository {
+  }
+  interface UsuarioPainelJpaRepository {
+  }
+}
+package "br.com.fiap.civia.presentation.config" {
+  class DataInitializer <<Component>> {
+  }
+}
+package "br.com.fiap.civia.presentation.controller" {
+  class AtualizacaoDisponibilidadeController <<RestController>> {
+  }
+  class ConsultaTotemController <<RestController>> {
+  }
+  class HorarioController <<RestController>> {
+  }
+  class OrganizacaoController <<RestController>> {
+  }
+  class PerfilAtendidoController <<RestController>> {
+  }
+  class ServicoController <<RestController>> {
+  }
+  class TipoServicoController <<RestController>> {
+  }
+  class TotemController <<RestController>> {
+  }
+  class UsuarioPainelController <<RestController>> {
+  }
+}
+AtualizacaoDisponibilidadeBO ..> AtualizacaoDisponibilidadeDAO
+AtualizacaoDisponibilidadeBO ..> ServicoDAO
+AtualizacaoDisponibilidadeBO ..> UsuarioPainelDAO
+AtualizacaoDisponibilidadeController ..> AtualizacaoDisponibilidadeBO
+AtualizacaoDisponibilidadeDAO <|.. AtualizacaoDisponibilidadeDAOImpl
+AtualizacaoDisponibilidadeDAOImpl ..> AtualizacaoDisponibilidadeJpaRepository
+CargaInicialBO ..> PerfilAtendidoDAO
+CargaInicialBO ..> TipoServicoDAO
+ConsultaTotemBO ..> ConsultaTotemDAO
+ConsultaTotemBO ..> PerfilAtendidoDAO
+ConsultaTotemBO ..> ServicoDAO
+ConsultaTotemBO ..> TipoServicoDAO
+ConsultaTotemBO ..> TotemDAO
+ConsultaTotemController ..> ConsultaTotemBO
+ConsultaTotemDAO <|.. ConsultaTotemDAOImpl
+ConsultaTotemDAOImpl ..> ConsultaTotemJpaRepository
+DataInitializer ..> CargaInicialBO
+HorarioBO ..> HorarioDAO
+HorarioBO ..> ServicoDAO
+HorarioController ..> HorarioBO
+HorarioDAO <|.. HorarioDAOImpl
+HorarioDAOImpl ..> HorarioJpaRepository
+MapaServicosBO ..> AtualizacaoDisponibilidadeDAO
+MapaServicosBO ..> DisponibilidadeBO
+MapaServicosBO ..> HorarioDAO
+MapaServicosBO ..> PerfilAtendidoDAO
+MapaServicosBO ..> ServicoDAO
+MapaServicosBO ..> TipoServicoDAO
+MapaServicosBO ..> TotemDAO
+OrganizacaoBO ..> OrganizacaoDAO
+OrganizacaoBO ..> ServicoDAO
+OrganizacaoBO ..> UsuarioPainelDAO
+OrganizacaoController ..> OrganizacaoBO
+OrganizacaoDAO <|.. OrganizacaoDAOImpl
+OrganizacaoDAOImpl ..> OrganizacaoJpaRepository
+PerfilAtendidoBO ..> ConsultaTotemDAO
+PerfilAtendidoBO ..> PerfilAtendidoDAO
+PerfilAtendidoBO ..> ServicoDAO
+PerfilAtendidoController ..> PerfilAtendidoBO
+PerfilAtendidoDAO <|.. PerfilAtendidoDAOImpl
+PerfilAtendidoDAOImpl ..> PerfilAtendidoJpaRepository
+ServicoBO ..> AtualizacaoDisponibilidadeDAO
+ServicoBO ..> ConsultaTotemDAO
+ServicoBO ..> HorarioDAO
+ServicoBO ..> OrganizacaoDAO
+ServicoBO ..> PerfilAtendidoDAO
+ServicoBO ..> ServicoDAO
+ServicoBO ..> TipoServicoDAO
+ServicoController ..> ServicoBO
+ServicoDAO <|.. ServicoDAOImpl
+ServicoDAOImpl ..> PerfilAtendidoJpaRepository
+ServicoDAOImpl ..> ServicoJpaRepository
+ServicoDAOImpl ..> TipoServicoJpaRepository
+TipoServicoBO ..> ConsultaTotemDAO
+TipoServicoBO ..> ServicoDAO
+TipoServicoBO ..> TipoServicoDAO
+TipoServicoController ..> TipoServicoBO
+TipoServicoDAO <|.. TipoServicoDAOImpl
+TipoServicoDAOImpl ..> TipoServicoJpaRepository
+TotemBO ..> ConsultaTotemDAO
+TotemBO ..> TotemDAO
+TotemController ..> MapaServicosBO
+TotemController ..> TotemBO
+TotemDAO <|.. TotemDAOImpl
+TotemDAOImpl ..> TotemJpaRepository
+UsuarioPainelBO ..> AtualizacaoDisponibilidadeDAO
+UsuarioPainelBO ..> OrganizacaoDAO
+UsuarioPainelBO ..> UsuarioPainelDAO
+UsuarioPainelController ..> UsuarioPainelBO
+UsuarioPainelDAO <|.. UsuarioPainelDAOImpl
+UsuarioPainelDAOImpl ..> UsuarioPainelJpaRepository
+@enduml

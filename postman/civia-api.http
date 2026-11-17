@@ -1,0 +1,431 @@
+# CIVIA API - todas as requisicoes (IntelliJ HTTP Client ou VS Code REST Client).
+# Rode de cima para baixo: os ids criados sao guardados e reaproveitados; o fim apaga o que foi criado.
+# Para testar o deploy, troque o valor de @baseUrl pela URL do Render.
+
+@baseUrl = http://localhost:8080
+
+### ===== 00 - Saude =====
+
+### Health (conexao com o Oracle) (espera 200)
+GET {{baseUrl}}/actuator/health
+
+### ===== 01 - Tipos de servico (T_TIPO_SERVICO) =====
+
+### Listar tipos (espera 200)
+GET {{baseUrl}}/api/v1/tipos-servico
+
+### Cadastrar tipo (espera 201)
+POST {{baseUrl}}/api/v1/tipos-servico
+Content-Type: application/json
+
+{
+  "nome": "Saude",
+  "icone": "cruz"
+}
+
+> {% client.global.set("tipoId", response.body.id); %}
+
+### Buscar tipo (espera 200)
+GET {{baseUrl}}/api/v1/tipos-servico/{{tipoId}}
+
+### Atualizar tipo (espera 200)
+PUT {{baseUrl}}/api/v1/tipos-servico/{{tipoId}}
+Content-Type: application/json
+
+{
+  "nome": "Saude e documentos",
+  "icone": "cruz"
+}
+
+### ===== 02 - Perfis atendidos (T_PERFIL_ATENDIDO) =====
+
+### Listar perfis (espera 200)
+GET {{baseUrl}}/api/v1/perfis
+
+### Cadastrar perfil (espera 201)
+POST {{baseUrl}}/api/v1/perfis
+Content-Type: application/json
+
+{
+  "descricao": "Pessoa migrante"
+}
+
+> {% client.global.set("perfilId", response.body.id); %}
+
+### Buscar perfil (espera 200)
+GET {{baseUrl}}/api/v1/perfis/{{perfilId}}
+
+### Atualizar perfil (espera 200)
+PUT {{baseUrl}}/api/v1/perfis/{{perfilId}}
+Content-Type: application/json
+
+{
+  "descricao": "Pessoa migrante ou refugiada"
+}
+
+### ===== 03 - Organizacoes (T_ORGANIZACAO) =====
+
+### Listar organizacoes (filtro opcional por tipo) (espera 200)
+GET {{baseUrl}}/api/v1/organizacoes?tipo=ONG
+
+### Cadastrar organizacao (espera 201)
+POST {{baseUrl}}/api/v1/organizacoes
+Content-Type: application/json
+
+{
+  "nome": "ONG Teste Postman (simulada)",
+  "tipo": "ONG",
+  "telefone": "11900000099",
+  "email": "postman@civia.exemplo.org"
+}
+
+> {% client.global.set("organizacaoId", response.body.id); %}
+
+### Buscar organizacao (espera 200)
+GET {{baseUrl}}/api/v1/organizacoes/{{organizacaoId}}
+
+### Atualizar organizacao (espera 200)
+PUT {{baseUrl}}/api/v1/organizacoes/{{organizacaoId}}
+Content-Type: application/json
+
+{
+  "nome": "ONG Teste Postman (simulada)",
+  "tipo": "ONG",
+  "telefone": "11900000098",
+  "email": "postman@civia.exemplo.org"
+}
+
+### ===== 04 - Usuarios do painel (T_USUARIO_PAINEL) =====
+
+### Listar usuarios (filtro opcional por organizacao) (espera 200)
+GET {{baseUrl}}/api/v1/usuarios
+
+### Cadastrar usuario (espera 201)
+POST {{baseUrl}}/api/v1/usuarios
+Content-Type: application/json
+
+{
+  "organizacaoId": {{organizacaoId}},
+  "nome": "Equipe Postman (simulada)",
+  "email": "equipe.postman@civia.exemplo.org",
+  "perfilAcesso": "EQUIPE"
+}
+
+> {% client.global.set("usuarioId", response.body.id); %}
+
+### Buscar usuario (espera 200)
+GET {{baseUrl}}/api/v1/usuarios/{{usuarioId}}
+
+### Atualizar usuario (espera 200)
+PUT {{baseUrl}}/api/v1/usuarios/{{usuarioId}}
+Content-Type: application/json
+
+{
+  "organizacaoId": {{organizacaoId}},
+  "nome": "Equipe Postman (simulada)",
+  "email": "equipe.postman@civia.exemplo.org",
+  "perfilAcesso": "EQUIPE",
+  "ativo": true
+}
+
+### ===== 05 - Servicos (T_SERVICO e T_SERVICO_PERFIL) =====
+
+### Listar servicos (filtros opcionais) (espera 200)
+GET {{baseUrl}}/api/v1/servicos?statusAprovacao=APROVADO
+
+### Cadastrar servico (abrigo) (espera 201)
+POST {{baseUrl}}/api/v1/servicos
+Content-Type: application/json
+
+{
+  "organizacaoId": {{organizacaoId}},
+  "tipoServicoId": 1,
+  "nome": "Abrigo Postman (simulado)",
+  "logradouro": "Rua Teste",
+  "numero": "100",
+  "bairro": "Se",
+  "latitude": -23.5512,
+  "longitude": -46.634,
+  "capacidade": 20,
+  "funciona24h": false,
+  "statusAprovacao": "APROVADO",
+  "perfilIds": [
+    2,
+    {{perfilId}}
+  ]
+}
+
+> {% client.global.set("servicoId", response.body.id); %}
+
+### Buscar servico (espera 200)
+GET {{baseUrl}}/api/v1/servicos/{{servicoId}}
+
+### Atualizar servico (espera 200)
+PUT {{baseUrl}}/api/v1/servicos/{{servicoId}}
+Content-Type: application/json
+
+{
+  "organizacaoId": {{organizacaoId}},
+  "tipoServicoId": 1,
+  "nome": "Abrigo Postman (simulado)",
+  "logradouro": "Rua Teste",
+  "numero": "100",
+  "bairro": "Se",
+  "latitude": -23.5512,
+  "longitude": -46.634,
+  "capacidade": 25,
+  "funciona24h": true,
+  "statusAprovacao": "APROVADO",
+  "perfilIds": [
+    2,
+    3,
+    {{perfilId}}
+  ]
+}
+
+### ===== 06 - Horarios (T_HORARIO) - sub-recurso de servico =====
+
+### Listar horarios de um servico (espera 200)
+GET {{baseUrl}}/api/v1/servicos/1/horarios
+
+### Cadastrar horario (quarta, 18:00-23:59) (espera 201)
+POST {{baseUrl}}/api/v1/servicos/5/horarios
+Content-Type: application/json
+
+{
+  "diaSemana": 4,
+  "horaAbertura": "18:00",
+  "horaFechamento": "23:59"
+}
+
+> {% client.global.set("horarioId", response.body.id); %}
+
+### Buscar horario (espera 200)
+GET {{baseUrl}}/api/v1/servicos/5/horarios/{{horarioId}}
+
+### Atualizar horario (espera 200)
+PUT {{baseUrl}}/api/v1/servicos/5/horarios/{{horarioId}}
+Content-Type: application/json
+
+{
+  "diaSemana": 4,
+  "horaAbertura": "19:00",
+  "horaFechamento": "22:00"
+}
+
+### ===== 07 - Atualizacoes de disponibilidade (T_ATUALIZACAO) =====
+
+### Registrar vagas de abrigo pelo painel (RN03: grava a faixa) (espera 201)
+POST {{baseUrl}}/api/v1/atualizacoes
+Content-Type: application/json
+
+{
+  "servicoId": {{servicoId}},
+  "origem": "PAINEL",
+  "usuarioId": {{usuarioId}},
+  "vagas": 3
+}
+
+> {% client.global.set("atualizacaoId", response.body.id); %}
+
+### Registrar vagas pela Central de Vagas (sem usuario) (espera 201)
+POST {{baseUrl}}/api/v1/atualizacoes
+Content-Type: application/json
+
+{
+  "servicoId": {{servicoId}},
+  "origem": "CENTRAL_VAGAS",
+  "vagas": 12
+}
+
+### Listar atualizacoes de um servico (espera 200)
+GET {{baseUrl}}/api/v1/atualizacoes?servicoId={{servicoId}}
+
+### Buscar atualizacao (espera 200)
+GET {{baseUrl}}/api/v1/atualizacoes/{{atualizacaoId}}
+
+### Corrigir atualizacao (espera 200)
+PUT {{baseUrl}}/api/v1/atualizacoes/{{atualizacaoId}}
+Content-Type: application/json
+
+{
+  "servicoId": {{servicoId}},
+  "origem": "PAINEL",
+  "usuarioId": {{usuarioId}},
+  "vagas": 0
+}
+
+### ===== 08 - Totens (T_TOTEM) e mapa de servicos =====
+
+### Listar totens (espera 200)
+GET {{baseUrl}}/api/v1/totens
+
+### Cadastrar totem (espera 201)
+POST {{baseUrl}}/api/v1/totens
+Content-Type: application/json
+
+{
+  "codigo": "TOT-PM-01",
+  "logradouro": "Praca Teste Postman",
+  "bairro": "Se",
+  "latitude": -23.5508,
+  "longitude": -46.6335,
+  "papelImpressora": true
+}
+
+> {% client.global.set("totemId", response.body.id); %}
+
+### Buscar totem (espera 200)
+GET {{baseUrl}}/api/v1/totens/{{totemId}}
+
+### Atualizar totem (espera 200)
+PUT {{baseUrl}}/api/v1/totens/{{totemId}}
+Content-Type: application/json
+
+{
+  "codigo": "TOT-PM-01",
+  "logradouro": "Praca Teste Postman",
+  "bairro": "Se",
+  "latitude": -23.5508,
+  "longitude": -46.6335,
+  "status": "ONLINE",
+  "papelImpressora": false
+}
+
+### Mapa: 3 abrigos mais proximos para mulher (espera 200)
+GET {{baseUrl}}/api/v1/totens/1/servicos?tipo=Abrigo&perfil=Mulher
+
+### Mapa: refeicoes (tipo pelo id) (espera 200)
+GET {{baseUrl}}/api/v1/totens/1/servicos?tipo=2
+
+### Mapa: todos os tipos (espera 200)
+GET {{baseUrl}}/api/v1/totens/{{totemId}}/servicos
+
+### ===== 09 - Consultas no totem (T_CONSULTA_TOTEM) =====
+
+### Registrar consulta com rota impressa (gera codigo) (espera 201)
+POST {{baseUrl}}/api/v1/consultas
+Content-Type: application/json
+
+{
+  "totemId": {{totemId}},
+  "tipoServicoId": 1,
+  "perfilId": 2,
+  "servicoEscolhidoId": {{servicoId}},
+  "imprimiuRota": true,
+  "pediuAbordagem": false
+}
+
+> {% client.global.set("consultaId", response.body.id); client.global.set("codigoChegada", response.body.codigoChegada); %}
+
+### Listar consultas de um totem (espera 200)
+GET {{baseUrl}}/api/v1/consultas?totemId={{totemId}}
+
+### Buscar consulta (espera 200)
+GET {{baseUrl}}/api/v1/consultas/{{consultaId}}
+
+### Atualizar consulta (pediu abordagem social) (espera 200)
+PUT {{baseUrl}}/api/v1/consultas/{{consultaId}}
+Content-Type: application/json
+
+{
+  "totemId": {{totemId}},
+  "tipoServicoId": 1,
+  "perfilId": 2,
+  "servicoEscolhidoId": {{servicoId}},
+  "imprimiuRota": true,
+  "pediuAbordagem": true
+}
+
+### Registrar chegada pelo codigo impresso (US14) (espera 200)
+PUT {{baseUrl}}/api/v1/consultas/chegada/{{codigoChegada}}
+
+### ===== 10 - Tratamento de erros =====
+
+### 400 - campos invalidos (Bean Validation) (espera 400)
+POST {{baseUrl}}/api/v1/servicos
+Content-Type: application/json
+
+{
+  "nome": "",
+  "latitude": 200
+}
+
+### 400 - valor de enum invalido (espera 400)
+GET {{baseUrl}}/api/v1/servicos?statusAprovacao=TALVEZ
+
+### 400 - JSON mal formado (espera 400)
+POST {{baseUrl}}/api/v1/totens
+Content-Type: application/json
+
+{ isto nao e json
+
+### 404 - recurso inexistente (espera 404)
+GET {{baseUrl}}/api/v1/servicos/999999
+
+### 409 - codigo de totem duplicado (espera 409)
+POST {{baseUrl}}/api/v1/totens
+Content-Type: application/json
+
+{
+  "codigo": "TOT-SE-01",
+  "logradouro": "Duplicado",
+  "bairro": "Se",
+  "latitude": -23.55,
+  "longitude": -46.63
+}
+
+### 409 - excluir totem com consultas (espera 409)
+DELETE {{baseUrl}}/api/v1/totens/1
+
+### 422 - vagas informadas para refeicao (espera 422)
+POST {{baseUrl}}/api/v1/atualizacoes
+Content-Type: application/json
+
+{
+  "servicoId": 5,
+  "usuarioId": 2,
+  "vagas": 10
+}
+
+### 422 - equipe atualizando servico de outra organizacao (espera 422)
+POST {{baseUrl}}/api/v1/atualizacoes
+Content-Type: application/json
+
+{
+  "servicoId": 5,
+  "usuarioId": {{usuarioId}},
+  "situacao": "ABERTO"
+}
+
+### 422 - totem em manutencao (espera 422)
+GET {{baseUrl}}/api/v1/totens/3/servicos
+
+### ===== 11 - Limpeza (DELETE) =====
+
+### Excluir consulta (espera 204)
+DELETE {{baseUrl}}/api/v1/consultas/{{consultaId}}
+
+### Excluir totem (espera 204)
+DELETE {{baseUrl}}/api/v1/totens/{{totemId}}
+
+### Excluir horario (espera 204)
+DELETE {{baseUrl}}/api/v1/servicos/5/horarios/{{horarioId}}
+
+### Excluir atualizacao (espera 204)
+DELETE {{baseUrl}}/api/v1/atualizacoes/{{atualizacaoId}}
+
+### Excluir servico (remove horarios e atualizacoes) (espera 204)
+DELETE {{baseUrl}}/api/v1/servicos/{{servicoId}}
+
+### Excluir usuario (espera 204)
+DELETE {{baseUrl}}/api/v1/usuarios/{{usuarioId}}
+
+### Excluir organizacao (espera 204)
+DELETE {{baseUrl}}/api/v1/organizacoes/{{organizacaoId}}
+
+### Excluir perfil (espera 204)
+DELETE {{baseUrl}}/api/v1/perfis/{{perfilId}}
+
+### Excluir tipo de servico (espera 204)
+DELETE {{baseUrl}}/api/v1/tipos-servico/{{tipoId}}
