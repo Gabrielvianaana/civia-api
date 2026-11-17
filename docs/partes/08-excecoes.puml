@@ -43,10 +43,11 @@ class GlobalExceptionHandler <<RestControllerAdvice>> {
 }
 DomainException <|-- DadoInvalidoException
 DomainException <|-- RegraNegocioVioladaException
-DomainException -[hidden]down- TradutorExcecaoDominio
-DadoInvalidoException -[hidden]down- DadosInvalidosException
-RegraNegocioVioladaException -[hidden]down- RegraNegocioException
-TradutorExcecaoDominio -[hidden]down- RecursoNaoEncontradoException
-DadosInvalidosException -[hidden]down- ConflitoException
-RegraNegocioException -[hidden]down- GlobalExceptionHandler
+DomainException -[hidden]down- RegraNegocioVioladaException
+DadoInvalidoException -[hidden]down- TradutorExcecaoDominio
+RegraNegocioVioladaException -[hidden]down- DadosInvalidosException
+TradutorExcecaoDominio -[hidden]down- RegraNegocioException
+DadosInvalidosException -[hidden]down- RecursoNaoEncontradoException
+RegraNegocioException -[hidden]down- ConflitoException
+RecursoNaoEncontradoException -[hidden]down- GlobalExceptionHandler
 @enduml

@@ -87,10 +87,11 @@ interface UsuarioPainelDAO {
   +existePorOrganizacao(organizacaoId) : boolean
   +excluir(id) : void
 }
-AtualizacaoDisponibilidadeDAO -[hidden]down- OrganizacaoDAO
-ConsultaTotemDAO -[hidden]down- PerfilAtendidoDAO
-HorarioDAO -[hidden]down- ServicoDAO
-OrganizacaoDAO -[hidden]down- TipoServicoDAO
-PerfilAtendidoDAO -[hidden]down- TotemDAO
-ServicoDAO -[hidden]down- UsuarioPainelDAO
+AtualizacaoDisponibilidadeDAO -[hidden]down- HorarioDAO
+ConsultaTotemDAO -[hidden]down- OrganizacaoDAO
+HorarioDAO -[hidden]down- PerfilAtendidoDAO
+OrganizacaoDAO -[hidden]down- ServicoDAO
+PerfilAtendidoDAO -[hidden]down- TipoServicoDAO
+ServicoDAO -[hidden]down- TotemDAO
+TipoServicoDAO -[hidden]down- UsuarioPainelDAO
 @enduml

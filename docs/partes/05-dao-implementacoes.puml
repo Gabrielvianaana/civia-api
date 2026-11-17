@@ -6,103 +6,84 @@ skinparam classAttributeIconSize 0
 skinparam shadowing false
 skinparam dpi 150
 hide empty members
-top to bottom direction
 interface AtualizacaoDisponibilidadeDAO {
 }
 class AtualizacaoDisponibilidadeDAOImpl <<Repository>> {
 }
 interface AtualizacaoDisponibilidadeJpaRepository {
 }
+AtualizacaoDisponibilidadeDAO <|.right. AtualizacaoDisponibilidadeDAOImpl
+AtualizacaoDisponibilidadeDAOImpl .right.> AtualizacaoDisponibilidadeJpaRepository
 interface ConsultaTotemDAO {
 }
 class ConsultaTotemDAOImpl <<Repository>> {
 }
 interface ConsultaTotemJpaRepository {
 }
+ConsultaTotemDAO <|.right. ConsultaTotemDAOImpl
+ConsultaTotemDAOImpl .right.> ConsultaTotemJpaRepository
+AtualizacaoDisponibilidadeDAO -[hidden]down- ConsultaTotemDAO
 interface HorarioDAO {
 }
 class HorarioDAOImpl <<Repository>> {
 }
 interface HorarioJpaRepository {
 }
+HorarioDAO <|.right. HorarioDAOImpl
+HorarioDAOImpl .right.> HorarioJpaRepository
+ConsultaTotemDAO -[hidden]down- HorarioDAO
 interface OrganizacaoDAO {
 }
 class OrganizacaoDAOImpl <<Repository>> {
 }
 interface OrganizacaoJpaRepository {
 }
+OrganizacaoDAO <|.right. OrganizacaoDAOImpl
+OrganizacaoDAOImpl .right.> OrganizacaoJpaRepository
+HorarioDAO -[hidden]down- OrganizacaoDAO
 interface PerfilAtendidoDAO {
 }
 class PerfilAtendidoDAOImpl <<Repository>> {
 }
 interface PerfilAtendidoJpaRepository {
 }
+PerfilAtendidoDAO <|.right. PerfilAtendidoDAOImpl
+PerfilAtendidoDAOImpl .right.> PerfilAtendidoJpaRepository
+OrganizacaoDAO -[hidden]down- PerfilAtendidoDAO
 interface ServicoDAO {
 }
 class ServicoDAOImpl <<Repository>> {
 }
 interface ServicoJpaRepository {
 }
+ServicoDAO <|.right. ServicoDAOImpl
+ServicoDAOImpl .right.> ServicoJpaRepository
+PerfilAtendidoDAO -[hidden]down- ServicoDAO
 interface TipoServicoDAO {
 }
 class TipoServicoDAOImpl <<Repository>> {
 }
 interface TipoServicoJpaRepository {
 }
+TipoServicoDAO <|.right. TipoServicoDAOImpl
+TipoServicoDAOImpl .right.> TipoServicoJpaRepository
+ServicoDAO -[hidden]down- TipoServicoDAO
 interface TotemDAO {
 }
 class TotemDAOImpl <<Repository>> {
 }
 interface TotemJpaRepository {
 }
+TotemDAO <|.right. TotemDAOImpl
+TotemDAOImpl .right.> TotemJpaRepository
+TipoServicoDAO -[hidden]down- TotemDAO
 interface UsuarioPainelDAO {
 }
 class UsuarioPainelDAOImpl <<Repository>> {
 }
 interface UsuarioPainelJpaRepository {
 }
-AtualizacaoDisponibilidadeDAO <|.. AtualizacaoDisponibilidadeDAOImpl
-AtualizacaoDisponibilidadeDAOImpl ..> AtualizacaoDisponibilidadeJpaRepository
-ConsultaTotemDAO <|.. ConsultaTotemDAOImpl
-ConsultaTotemDAOImpl ..> ConsultaTotemJpaRepository
-HorarioDAO <|.. HorarioDAOImpl
-HorarioDAOImpl ..> HorarioJpaRepository
-OrganizacaoDAO <|.. OrganizacaoDAOImpl
-OrganizacaoDAOImpl ..> OrganizacaoJpaRepository
-PerfilAtendidoDAO <|.. PerfilAtendidoDAOImpl
-PerfilAtendidoDAOImpl ..> PerfilAtendidoJpaRepository
-ServicoDAO <|.. ServicoDAOImpl
-ServicoDAOImpl ..> PerfilAtendidoJpaRepository
-ServicoDAOImpl ..> ServicoJpaRepository
-ServicoDAOImpl ..> TipoServicoJpaRepository
-TipoServicoDAO <|.. TipoServicoDAOImpl
-TipoServicoDAOImpl ..> TipoServicoJpaRepository
-TotemDAO <|.. TotemDAOImpl
-TotemDAOImpl ..> TotemJpaRepository
-UsuarioPainelDAO <|.. UsuarioPainelDAOImpl
-UsuarioPainelDAOImpl ..> UsuarioPainelJpaRepository
-AtualizacaoDisponibilidadeDAO -[hidden]down- ConsultaTotemDAO
-AtualizacaoDisponibilidadeDAOImpl -[hidden]down- ConsultaTotemDAOImpl
-AtualizacaoDisponibilidadeJpaRepository -[hidden]down- ConsultaTotemJpaRepository
-ConsultaTotemDAO -[hidden]down- HorarioDAO
-ConsultaTotemDAOImpl -[hidden]down- HorarioDAOImpl
-ConsultaTotemJpaRepository -[hidden]down- HorarioJpaRepository
-HorarioDAO -[hidden]down- OrganizacaoDAO
-HorarioDAOImpl -[hidden]down- OrganizacaoDAOImpl
-HorarioJpaRepository -[hidden]down- OrganizacaoJpaRepository
-OrganizacaoDAO -[hidden]down- PerfilAtendidoDAO
-OrganizacaoDAOImpl -[hidden]down- PerfilAtendidoDAOImpl
-OrganizacaoJpaRepository -[hidden]down- PerfilAtendidoJpaRepository
-PerfilAtendidoDAO -[hidden]down- ServicoDAO
-PerfilAtendidoDAOImpl -[hidden]down- ServicoDAOImpl
-PerfilAtendidoJpaRepository -[hidden]down- ServicoJpaRepository
-ServicoDAO -[hidden]down- TipoServicoDAO
-ServicoDAOImpl -[hidden]down- TipoServicoDAOImpl
-ServicoJpaRepository -[hidden]down- TipoServicoJpaRepository
-TipoServicoDAO -[hidden]down- TotemDAO
-TipoServicoDAOImpl -[hidden]down- TotemDAOImpl
-TipoServicoJpaRepository -[hidden]down- TotemJpaRepository
+UsuarioPainelDAO <|.right. UsuarioPainelDAOImpl
+UsuarioPainelDAOImpl .right.> UsuarioPainelJpaRepository
 TotemDAO -[hidden]down- UsuarioPainelDAO
-TotemDAOImpl -[hidden]down- UsuarioPainelDAOImpl
-TotemJpaRepository -[hidden]down- UsuarioPainelJpaRepository
 @enduml

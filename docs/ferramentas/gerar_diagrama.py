@@ -311,10 +311,28 @@ parte("02-dominio-disponibilidade.puml", "CIVIA - Dominio: disponibilidade, usua
        "UsuarioPainel", "PerfilAcesso", "Organizacao", "TipoOrganizacao"])
 parte("03-dominio-totem.puml", "CIVIA - Dominio: totem e consultas",
       ["Totem", "ConsultaTotem", "StatusTotem", "Endereco", "Coordenada"])
-parte("04-dominio-dao.puml", "CIVIA - Interfaces DAO (dominio)", sorted(DAOS), colunas=3)
-TRIOS = [x for d in sorted(DAOS) for x in (d, d + "Impl", d.replace("DAO", "JpaRepository"))]
-parte("05-dao-implementacoes.puml", "CIVIA - DAO: interface (dominio) <- DAOImpl (infraestrutura) -> JpaRepository",
-      TRIOS, completo=False, colunas=3)
+parte("04-dominio-dao.puml", "CIVIA - Interfaces DAO (dominio)", sorted(DAOS), colunas=2)
+def parte_dao(arquivo, titulo):
+    """Uma linha por agregado: DAO (dominio) <|.. DAOImpl (infraestrutura) ..> JpaRepository."""
+    linhas = ["@startuml", f"title {titulo}", "' Gerado a partir do codigo-fonte Java (pasta civia-*/src/main/java).",
+              "!pragma layout smetana", "skinparam classAttributeIconSize 0", "skinparam shadowing false",
+              "skinparam dpi 150", "hide empty members"]
+    anterior = None
+    for dao in sorted(DAOS):
+        impl, jpa = dao + "Impl", dao.replace("DAO", "JpaRepository")
+        for n in (dao, impl, jpa):
+            linhas += bloco_classe(classes[n], False)
+        linhas.append(f"{dao} <|.right. {impl}")
+        linhas.append(f"{impl} .right.> {jpa}")
+        if anterior:
+            linhas.append(f"{anterior} -[hidden]down- {dao}")
+        anterior = dao
+    linhas.append("@enduml")
+    with open(os.path.join(DOCS, "partes", arquivo), "w", encoding="utf-8") as f:
+        f.write("\n".join(linhas) + "\n")
+
+
+parte_dao("05-dao-implementacoes.puml", "CIVIA - DAO: interface (dominio) <- DAOImpl (infraestrutura) -> JpaRepository")
 PARES = []
 for ctrl in sorted(n for n in classes if n.endswith("Controller")):
     bo = ctrl.replace("Controller", "BO")
@@ -322,11 +340,11 @@ for ctrl in sorted(n for n in classes if n.endswith("Controller")):
 PARES += ["MapaServicosBO", "DisponibilidadeBO", "DataInitializer", "CargaInicialBO"]
 parte("06-controllers-bos.puml", "CIVIA - Controllers e BOs (regras de negocio)", PARES, completo=False, colunas=2)
 parte("07-bos-detalhe.puml", "CIVIA - BOs com metodos",
-      sorted(n for n in classes if n.endswith("BO")) + ["Disponibilidade"], colunas=3, relacoes_extra=False)
+      sorted(n for n in classes if n.endswith("BO")) + ["Disponibilidade"], colunas=2, relacoes_extra=False)
 parte("08-excecoes.puml", "CIVIA - Tratamento de excecoes",
       ["DomainException", "DadoInvalidoException", "RegraNegocioVioladaException", "TradutorExcecaoDominio",
        "DadosInvalidosException", "RegraNegocioException", "RecursoNaoEncontradoException", "ConflitoException",
-       "GlobalExceptionHandler"], colunas=3)
+       "GlobalExceptionHandler"], colunas=2)
 parte("09-entidades-jpa.puml", "CIVIA - Entidades JPA (mapeamento das tabelas Oracle)",
       sorted(n for n in classes if n.endswith("Entity")) + ["HoraConverter", "SimNaoConverter"], colunas=3)
 parte("10-dtos.puml", "CIVIA - DTOs (records de entrada e saida)",

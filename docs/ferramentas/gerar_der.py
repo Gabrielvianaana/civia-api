@@ -104,3 +104,39 @@ p.append("@enduml")
 with open(os.path.join(docs, "der.puml"), "w", encoding="utf-8") as f:
     f.write("\n".join(p) + "\n")
 print(len(tabelas), "tabelas,", len(fks), "FKs")
+
+
+# ---------- DER em duas partes (cada uma cabe em uma pagina do PDF) ----------
+def der_parte(arquivo, titulo, nomes):
+    q = ["@startuml", f"title {titulo}", "' Gerado a partir de db/01_ddl.sql", "!pragma layout smetana",
+         "hide circle", "skinparam shadowing false", "skinparam dpi 150", "top to bottom direction"]
+    for nome in nomes:
+        t = tabelas[nome]
+        q.append(f'entity "{nome}" as {curto(nome)} {{')
+        for col, tipo, notnull in t["colunas"]:
+            if col in t["pk"]:
+                q.append(f"  * **{col}** : {tipo} <<PK{', FK' if (nome, col) in fk_cols else ''}>>")
+        q.append("  --")
+        for col, tipo, notnull in t["colunas"]:
+            if col in t["pk"]:
+                continue
+            marcas = [m for m, cond in (("FK", (nome, col) in fk_cols), ("UK", any(u == [col] for u in t["uniques"]))) if cond]
+            q.append(f"  {'*' if notnull else ' '} {col} : {tipo}" + (f" <<{', '.join(marcas)}>>" if marcas else ""))
+        q.append("}")
+    for tab, col, ref in fks:
+        if tab in nomes and ref in nomes:
+            _, _, notnull = coluna_info(tab, col)
+            unico = any(u == [col] for u in tabelas[tab]["uniques"])
+            q.append(f'{curto(ref)} {"||" if notnull else "|o"}--{"o|" if unico else "o{"} {curto(tab)} : {col}')
+    q.append("@enduml")
+    with open(os.path.join(docs, arquivo), "w", encoding="utf-8") as f:
+        f.write("\n".join(q) + "\n")
+
+
+der_parte("der-1-mapa-servicos.puml", "CIVIA - DER parte 1: mapa de servicos (tabelas usadas pela API)",
+          ["T_ORGANIZACAO", "T_TIPO_SERVICO", "T_PERFIL_ATENDIDO", "T_SERVICO", "T_SERVICO_PERFIL", "T_HORARIO",
+           "T_USUARIO_PAINEL", "T_ATUALIZACAO", "T_TOTEM", "T_CONSULTA_TOTEM"])
+der_parte("der-2-reciclagem.puml", "CIVIA - DER parte 2: modulo de reciclagem",
+          ["T_ORGANIZACAO", "T_TOTEM", "T_USUARIO_PAINEL", "T_POSTO_RECICLAGEM", "T_MATERIAL", "T_CARTAO",
+           "T_ENTREGA", "T_RECOMPENSA", "T_TROCA", "T_COLETA"])
+print("DER em partes: der-1-mapa-servicos.puml e der-2-reciclagem.puml")

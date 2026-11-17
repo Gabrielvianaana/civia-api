@@ -137,14 +137,15 @@ class Disponibilidade <<record>> {
   -origem : Origem
   -dataReferencia : LocalDateTime
 }
-AtualizacaoDisponibilidadeBO -[hidden]down- DisponibilidadeBO
-CargaInicialBO -[hidden]down- HorarioBO
-ConsultaTotemBO -[hidden]down- MapaServicosBO
-DisponibilidadeBO -[hidden]down- OrganizacaoBO
-HorarioBO -[hidden]down- PerfilAtendidoBO
-MapaServicosBO -[hidden]down- ServicoBO
-OrganizacaoBO -[hidden]down- TipoServicoBO
-PerfilAtendidoBO -[hidden]down- TotemBO
-ServicoBO -[hidden]down- UsuarioPainelBO
-TipoServicoBO -[hidden]down- Disponibilidade
+AtualizacaoDisponibilidadeBO -[hidden]down- ConsultaTotemBO
+CargaInicialBO -[hidden]down- DisponibilidadeBO
+ConsultaTotemBO -[hidden]down- HorarioBO
+DisponibilidadeBO -[hidden]down- MapaServicosBO
+HorarioBO -[hidden]down- OrganizacaoBO
+MapaServicosBO -[hidden]down- PerfilAtendidoBO
+OrganizacaoBO -[hidden]down- ServicoBO
+PerfilAtendidoBO -[hidden]down- TipoServicoBO
+ServicoBO -[hidden]down- TotemBO
+TipoServicoBO -[hidden]down- UsuarioPainelBO
+TotemBO -[hidden]down- Disponibilidade
 @enduml
